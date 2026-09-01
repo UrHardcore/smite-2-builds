@@ -205,6 +205,35 @@ main{max-width:1180px;margin:0 auto;padding:36px 32px 80px;}
 .slot-row .role-sel{max-width:110px;flex:0 0 110px;}
 .you-row select{border-color:var(--gold-dim);}
 
+/* ---------- god picker (buscador con teclado) ---------- */
+.god-picker{position:relative;flex:1;min-width:0;}
+.god-picker-input{
+  width:100%;background:var(--panel-raised);border:1px solid var(--panel-line);color:var(--text);
+  padding:10px 34px 10px 12px;font-size:13.5px;font-family:'Manrope';border-radius:var(--radius);
+}
+.god-picker.you .god-picker-input{border-color:var(--gold-dim);}
+.god-picker-input:focus{outline:none;border-color:var(--gold-dim);}
+.god-picker-clear{
+  position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  background:none;border:none;color:var(--text-faint);font-size:16px;line-height:1;padding:4px;display:none;
+}
+.god-picker.has-value .god-picker-clear{display:block;}
+.god-picker-list{
+  display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:30;
+  background:var(--panel-raised);border:1px solid var(--panel-line);
+  max-height:260px;overflow-y:auto;box-shadow:0 12px 28px rgba(0,0,0,.45);
+}
+.god-picker-list.open{display:block;}
+.god-picker-item{
+  display:flex;align-items:center;gap:9px;padding:9px 12px;cursor:pointer;font-size:13.5px;color:var(--text);
+  border-bottom:1px solid var(--panel-line);
+}
+.god-picker-item:last-child{border-bottom:none;}
+.god-picker-item:hover, .god-picker-item.active{background:var(--panel);}
+.god-picker-item img{width:24px;height:24px;border-radius:50%;flex-shrink:0;object-fit:cover;background:var(--panel);}
+.god-picker-item .gp-meta{color:var(--text-muted);font-size:11.5px;margin-left:auto;flex-shrink:0;}
+.god-picker-empty{padding:14px 12px;font-size:12.5px;color:var(--text-faint);text-align:center;}
+
 .analyze-wrap{text-align:center;margin:26px 0 6px;}
 .analyze-btn{
   background:var(--gold);color:#1A1408;border:none;font-weight:800;font-size:15px;
@@ -305,6 +334,8 @@ footer p{margin:0 0 10px;}
   .slot-row .role-sel{max-width:100%;flex:1;}
   .slot-row select, .slot-row input{width:100%;font-size:16px;padding:12px 10px;} /* 16px min = evita auto-zoom en iOS */
   .you-row{flex-direction:column;}
+  .god-picker-input{font-size:16px;padding:12px 34px 12px 12px;}
+  .god-picker-list{max-height:220px;}
 
   .analyze-btn{width:100%;padding:15px 20px;font-size:15px;}
   .build-cols{grid-template-columns:1fr;}
@@ -427,7 +458,7 @@ footer p{margin:0 0 10px;}
       <div class="team-panel ally">
         <h3 data-i18n="allyTitle">🛡 Tu equipo</h3>
         <div class="slot-row you-row">
-          <select id="my-god"></select>
+          <div id="my-god-wrap"></div>
           <select id="my-role" class="role-sel"></select>
         </div>
         <div id="ally-slots"></div>
@@ -782,44 +813,140 @@ function renderModes(){
   `).join('');
 }
 
-/* ---------------- BUILDER tab ---------------- */
-function godOptions(selectedId){
-  return `<option value="">${t('none')}</option>` + GODS.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(g=>`<option value="${g.id}" ${g.id===selectedId?'selected':''}>${g.name}</option>`).join('');
-}
+/* ---------------- BUILDER tab: buscador de dioses con teclado ---------------- */
 function roleOptions(selectedRole){
   const roles = ['solo','jungla','mid','support','carry'];
   return roles.map(r=>`<option value="${r}" ${r===selectedRole?'selected':''}>${roleLabel(r)}</option>`).join('');
 }
+
+function godPickerHTML(pickerId, isYou){
+  return `
+    <div class="god-picker${isYou?' you':''}" id="${pickerId}" data-god-id="">
+      <input type="text" class="god-picker-input" autocomplete="off" placeholder="${t('godSearchPh')}">
+      <button type="button" class="god-picker-clear" onclick="clearGodPicker('${pickerId}')" aria-label="clear">✕</button>
+      <div class="god-picker-list"></div>
+    </div>
+  `;
+}
+
+function godPickerMatches(query){
+  const q = (query||'').trim().toLowerCase();
+  const sorted = GODS.slice().sort((a,b)=>a.name.localeCompare(b.name));
+  if(!q) return sorted;
+  return sorted.filter(g=>g.name.toLowerCase().includes(q));
+}
+
+function renderGodPickerList(pickerId, query){
+  const wrap = document.getElementById(pickerId);
+  if(!wrap) return;
+  const listEl = wrap.querySelector('.god-picker-list');
+  const matches = godPickerMatches(query).slice(0,40);
+  if(matches.length===0){
+    listEl.innerHTML = `<div class="god-picker-empty">${LANG==='es'?'Sin resultados':'No results'}</div>`;
+  } else {
+    listEl.innerHTML = matches.map(g=>`
+      <div class="god-picker-item" data-id="${g.id}" onmousedown="selectGodPicker('${pickerId}','${g.id}')">
+        <img src="${g.icon}" alt="" onerror="this.style.visibility='hidden'">
+        <span>${g.name}</span>
+        <span class="gp-meta">${roleLabel(g.role)}</span>
+      </div>
+    `).join('');
+  }
+  listEl.classList.add('open');
+}
+
+function selectGodPicker(pickerId, godId){
+  const wrap = document.getElementById(pickerId);
+  if(!wrap) return;
+  const g = godById(godId);
+  const input = wrap.querySelector('.god-picker-input');
+  wrap.dataset.godId = godId;
+  input.value = g ? g.name : '';
+  wrap.classList.toggle('has-value', !!godId);
+  wrap.querySelector('.god-picker-list').classList.remove('open');
+}
+
+function clearGodPicker(pickerId){
+  const wrap = document.getElementById(pickerId);
+  if(!wrap) return;
+  wrap.dataset.godId = '';
+  wrap.querySelector('.god-picker-input').value = '';
+  wrap.classList.remove('has-value');
+  wrap.querySelector('.god-picker-input').focus();
+  renderGodPickerList(pickerId, '');
+}
+
+function getGodPickerValue(pickerId){
+  const wrap = document.getElementById(pickerId);
+  return wrap ? (wrap.dataset.godId || '') : '';
+}
+
+function initGodPicker(pickerId, initialId){
+  const wrap = document.getElementById(pickerId);
+  if(!wrap) return;
+  const input = wrap.querySelector('.god-picker-input');
+  const g = initialId ? godById(initialId) : null;
+  wrap.dataset.godId = g ? g.id : '';
+  input.value = g ? g.name : '';
+  wrap.classList.toggle('has-value', !!g);
+
+  input.addEventListener('focus', ()=>{ renderGodPickerList(pickerId, ''); input.select(); });
+  input.addEventListener('input', ()=>{
+    renderGodPickerList(pickerId, input.value);
+    // typing invalidates the previous confirmed selection until user picks again
+    wrap.dataset.godId = '';
+    wrap.classList.remove('has-value');
+  });
+  input.addEventListener('blur', ()=>{
+    setTimeout(()=>{
+      wrap.querySelector('.god-picker-list').classList.remove('open');
+      // if nothing was (re)selected, restore last valid god name or clear stray text
+      const curId = wrap.dataset.godId;
+      if(curId){
+        const cg = godById(curId);
+        input.value = cg ? cg.name : '';
+      } else {
+        input.value = '';
+      }
+    }, 150);
+  });
+}
+
 function renderBuilderSelects(){
   // preserve current selections across language switch
-  const prevMyGod = document.getElementById('my-god') ? document.getElementById('my-god').value : '';
+  const prevMyGod = getGodPickerValue('my-god-picker');
   const prevMyRole = document.getElementById('my-role') ? document.getElementById('my-role').value : 'mid';
-  document.getElementById('my-god').innerHTML = godOptions(prevMyGod);
+  document.getElementById('my-god-wrap').innerHTML = godPickerHTML('my-god-picker', true);
+  initGodPicker('my-god-picker', prevMyGod);
   document.getElementById('my-role').innerHTML = roleOptions(prevMyRole || 'mid');
 
   const allySlots = document.getElementById('ally-slots');
-  const prevAllies = Array.from(allySlots.querySelectorAll('select')).map(s=>s.value);
-  allySlots.innerHTML = [0,1,2,3].map(i=>`
-    <div class="slot-row"><select id="ally-${i}">${godOptions(prevAllies[i]||'')}</select></div>
-  `).join('');
+  const prevAllies = [0,1,2,3].map(i=>getGodPickerValue('ally-picker-'+i));
+  allySlots.innerHTML = [0,1,2,3].map(i=>`<div class="slot-row">${godPickerHTML('ally-picker-'+i, false)}</div>`).join('');
+  [0,1,2,3].forEach(i=>initGodPicker('ally-picker-'+i, prevAllies[i]));
 
   const enemySlots = document.getElementById('enemy-slots');
-  const prevEnemies = Array.from(enemySlots.querySelectorAll('select')).map(s=>s.value);
-  enemySlots.innerHTML = [0,1,2,3,4].map(i=>`
-    <div class="slot-row"><select id="enemy-${i}">${godOptions(prevEnemies[i]||'')}</select></div>
-  `).join('');
+  const prevEnemies = [0,1,2,3,4].map(i=>getGodPickerValue('enemy-picker-'+i));
+  enemySlots.innerHTML = [0,1,2,3,4].map(i=>`<div class="slot-row">${godPickerHTML('enemy-picker-'+i, false)}</div>`).join('');
+  [0,1,2,3,4].forEach(i=>initGodPicker('enemy-picker-'+i, prevEnemies[i]));
 }
+
+document.addEventListener('click', (e)=>{
+  if(!e.target.closest('.god-picker')){
+    document.querySelectorAll('.god-picker-list.open').forEach(l=>l.classList.remove('open'));
+  }
+});
 
 /* ---------------- ANALYSIS ENGINE ---------------- */
 function getSelectedEnemies(){
-  return [0,1,2,3,4].map(i=>document.getElementById('enemy-'+i).value).filter(Boolean).map(godById);
+  return [0,1,2,3,4].map(i=>getGodPickerValue('enemy-picker-'+i)).filter(Boolean).map(godById);
 }
 function getSelectedAllies(){
-  return [0,1,2,3].map(i=>document.getElementById('ally-'+i).value).filter(Boolean).map(godById);
+  return [0,1,2,3].map(i=>getGodPickerValue('ally-picker-'+i)).filter(Boolean).map(godById);
 }
 
 function analyzeMatch(){
-  const myGodId = document.getElementById('my-god').value;
+  const myGodId = getGodPickerValue('my-god-picker');
   if(!myGodId){ alert(t('fillTeams')); return; }
   const myGod = godById(myGodId);
   const myRole = document.getElementById('my-role').value;
