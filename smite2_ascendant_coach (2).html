@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ascendant — Coach de Smite 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#0C0B12;
+  --panel:#15131E;
+  --panel-raised:#1D1A29;
+  --panel-line:#2C2740;
+  --gold:#C9A24B;
+  --gold-bright:#E8C874;
+  --gold-dim:#8A6F35;
+  --ally:#3FA79A;
+  --ally-dim:#1E3D3A;
+  --enemy:#C1453F;
+  --enemy-dim:#3D2020;
+  --text:#EDEAE0;
+  --text-muted:#9C96A8;
+  --text-faint:#655F72;
+  --f-color:#D68A4C;
+  --m-color:#5B8FD6;
+  --radius:2px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    radial-gradient(ellipse 1200px 700px at 50% -10%, #241B3A 0%, transparent 60%),
+    radial-gradient(ellipse 900px 500px at 100% 100%, #1A2B2A 0%, transparent 55%),
+    var(--void);
+  color:var(--text);
+  font-family:'Manrope',sans-serif;
+  min-height:100vh;
+  line-height:1.5;
+}
+h1,h2,h3,.display{
+  font-family:'Cinzel',serif;
+  letter-spacing:.01em;
+  font-weight:700;
+  margin:0;
+}
+a{color:var(--gold-bright);}
+button{font-family:'Manrope',sans-serif;cursor:pointer;}
+
+/* ---------- top bar ---------- */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:22px 32px;
+  border-bottom:1px solid var(--panel-line);
+  background:linear-gradient(180deg, rgba(21,19,30,.9), rgba(21,19,30,.4));
+}
+.brand{display:flex;align-items:center;gap:14px;}
+.brand-mark{
+  width:38px;height:38px;border:1.5px solid var(--gold);
+  transform:rotate(45deg);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.brand-mark span{transform:rotate(-45deg);color:var(--gold-bright);font-family:'Cinzel';font-weight:800;font-size:15px;}
+.brand-text h1{font-size:22px;color:var(--text);}
+.brand-text p{margin:2px 0 0;font-size:12.5px;color:var(--text-muted);letter-spacing:.03em;}
+
+.lang-switch{display:flex;border:1px solid var(--panel-line);border-radius:var(--radius);overflow:hidden;}
+.lang-switch button{
+  background:var(--panel);border:none;color:var(--text-muted);
+  padding:9px 14px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px;
+  border-right:1px solid var(--panel-line);
+}
+.lang-switch button:last-child{border-right:none;}
+.lang-switch button.active{background:var(--panel-raised);color:var(--gold-bright);}
+.flag{font-size:15px;}
+
+/* ---------- nav tabs ---------- */
+.tabs{
+  display:flex;gap:2px;padding:0 32px;
+  border-bottom:1px solid var(--panel-line);
+  overflow-x:auto;
+  background:rgba(21,19,30,.5);
+}
+.tab-btn{
+  background:transparent;border:none;color:var(--text-muted);
+  padding:16px 18px 14px;font-size:14px;font-weight:600;
+  border-bottom:2px solid transparent;white-space:nowrap;
+}
+.tab-btn.active{color:var(--gold-bright);border-bottom-color:var(--gold);}
+.tab-btn:hover:not(.active){color:var(--text);}
+
+main{max-width:1180px;margin:0 auto;padding:36px 32px 80px;}
+.view{display:none;}
+.view.active{display:block;}
+
+/* ---------- hero (inicio) ---------- */
+.hero{
+  display:grid;grid-template-columns:1.2fr .8fr;gap:40px;
+  padding:36px 0 44px;border-bottom:1px solid var(--panel-line);margin-bottom:34px;
+  align-items:center;
+}
+.hero h2{font-size:34px;line-height:1.25;color:var(--text);}
+.hero h2 em{font-style:normal;color:var(--gold-bright);}
+.hero p{color:var(--text-muted);font-size:15px;max-width:52ch;margin-top:14px;}
+.hero-cta{
+  margin-top:22px;display:inline-flex;align-items:center;gap:10px;
+  background:var(--gold);color:#1A1408;font-weight:800;font-size:14px;
+  padding:12px 20px;border:none;border-radius:var(--radius);
+}
+.hero-cta:hover{background:var(--gold-bright);}
+.hero-panel{
+  border:1px solid var(--panel-line);background:var(--panel);
+  padding:22px;
+}
+.hero-panel h3{font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;font-family:'Manrope';font-weight:800;}
+.hero-stat-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--panel-line);font-size:14px;}
+.hero-stat-row:last-child{border-bottom:none;}
+.hero-stat-row b{color:var(--text);}
+.hero-stat-row span{color:var(--text-muted);}
+
+.mode-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:10px;}
+.mode-card{border:1px solid var(--panel-line);background:var(--panel);padding:18px;}
+.mode-card h4{font-family:'Cinzel';font-size:16px;color:var(--gold-bright);margin-bottom:8px;}
+.mode-card p{font-size:13.5px;color:var(--text-muted);margin:0;}
+.section-title{font-size:20px;margin:44px 0 16px;color:var(--text);display:flex;align-items:center;gap:12px;}
+.section-title .rule{flex:1;height:1px;background:var(--panel-line);}
+
+/* ---------- dioses ---------- */
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
+.filters select, .filters input{
+  background:var(--panel);border:1px solid var(--panel-line);color:var(--text);
+  padding:9px 12px;font-size:13.5px;font-family:'Manrope';border-radius:var(--radius);
+}
+.filters input{flex:1;min-width:180px;}
+.god-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;}
+.god-card{
+  border:1px solid var(--panel-line);background:var(--panel);
+  padding:12px;display:flex;flex-direction:column;align-items:center;text-align:center;
+  cursor:pointer;transition:border-color .15s, transform .1s;
+}
+.god-card:hover{border-color:var(--gold-dim);transform:translateY(-2px);}
+.god-avatar{
+  width:56px;height:56px;border-radius:50%;object-fit:cover;
+  border:1.5px solid var(--panel-line);background:var(--panel-raised);margin-bottom:8px;
+}
+.god-card .gname{font-size:13.5px;font-weight:700;color:var(--text);}
+.god-card .gmeta{font-size:11px;color:var(--text-muted);margin-top:3px;}
+.pill{
+  display:inline-block;font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;margin-top:6px;
+  letter-spacing:.03em;
+}
+.pill.F{background:rgba(214,138,76,.15);color:var(--f-color);}
+.pill.M{background:rgba(91,143,214,.15);color:var(--m-color);}
+
+/* god detail modal */
+.modal-bg{position:fixed;inset:0;background:rgba(8,7,12,.75);display:none;align-items:flex-start;justify-content:center;z-index:50;padding:60px 20px;overflow-y:auto;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--panel-raised);border:1px solid var(--panel-line);max-width:620px;width:100%;padding:28px;position:relative;}
+.modal-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text-muted);font-size:20px;}
+.modal-head{display:flex;gap:16px;align-items:center;margin-bottom:18px;}
+.modal-head img{width:72px;height:72px;border-radius:50%;border:2px solid var(--gold-dim);}
+.modal-head h3{font-size:22px;color:var(--text);}
+.modal-head .gmeta{color:var(--text-muted);font-size:13px;margin-top:4px;}
+.tagbar{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0;}
+.tagchip{background:var(--panel);border:1px solid var(--panel-line);padding:6px 10px;font-size:12px;color:var(--text-muted);}
+.tagchip b{color:var(--gold-bright);}
+.modal h4{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--gold);margin:18px 0 8px;}
+.counter-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;}
+.counter-list li{font-size:13.5px;color:var(--text-muted);border-left:2px solid var(--panel-line);padding-left:10px;}
+
+/* ---------- items ---------- */
+.item-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+.itag-btn{background:var(--panel);border:1px solid var(--panel-line);color:var(--text-muted);padding:8px 14px;font-size:12.5px;font-weight:700;}
+.itag-btn.active{color:var(--gold-bright);border-color:var(--gold-dim);background:var(--panel-raised);}
+.item-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+.item-card{border:1px solid var(--panel-line);background:var(--panel);padding:16px;}
+.item-icon{width:32px;height:32px;object-fit:cover;border:1px solid var(--panel-line);background:var(--panel-raised);flex-shrink:0;}
+.item-icon-fallback{display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-weight:700;color:var(--gold-dim);}
+.mini-icon{width:20px;height:20px;object-fit:cover;border:1px solid var(--panel-line);vertical-align:middle;margin-right:7px;border-radius:2px;}
+.item-card .ihead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;}
+.item-card .iname{font-weight:700;font-size:14.5px;color:var(--text);}
+.item-card .idesc{font-size:12.8px;color:var(--text-muted);line-height:1.55;}
+.itype-badge{font-size:10px;font-weight:800;padding:2px 8px;border:1px solid var(--panel-line);color:var(--text-faint);white-space:nowrap;text-transform:uppercase;letter-spacing:.04em;}
+
+/* ---------- builder ---------- */
+.builder-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:10px;}
+@media (max-width:820px){.builder-grid{grid-template-columns:1fr;}}
+.team-panel{border:1px solid var(--panel-line);background:var(--panel);padding:20px;}
+.team-panel.ally{border-top:3px solid var(--ally);}
+.team-panel.enemy{border-top:3px solid var(--enemy);}
+.team-panel h3{font-size:15px;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.team-panel.ally h3{color:var(--ally);}
+.team-panel.enemy h3{color:var(--enemy);}
+.slot-row{display:flex;gap:10px;align-items:center;margin-bottom:10px;}
+.slot-row select{
+  flex:1;background:var(--panel-raised);border:1px solid var(--panel-line);color:var(--text);
+  padding:10px 10px;font-size:13.5px;font-family:'Manrope';border-radius:var(--radius);
+}
+.slot-row .role-sel{max-width:110px;flex:0 0 110px;}
+.you-row select{border-color:var(--gold-dim);}
+
+.analyze-wrap{text-align:center;margin:26px 0 6px;}
+.analyze-btn{
+  background:var(--gold);color:#1A1408;border:none;font-weight:800;font-size:15px;
+  padding:14px 34px;letter-spacing:.02em;
+}
+.analyze-btn:hover{background:var(--gold-bright);}
+.analyze-btn:disabled{background:var(--panel-line);color:var(--text-faint);cursor:not-allowed;}
+
+.results{display:none;margin-top:36px;}
+.results.show{display:block;}
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;}
+@media (max-width:820px){.res-grid{grid-template-columns:1fr;}}
+.res-card{border:1px solid var(--panel-line);background:var(--panel);padding:20px;}
+.res-card h4{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--gold);margin-bottom:14px;}
+.bar-row{margin-bottom:12px;}
+.bar-row .blabel{display:flex;justify-content:space-between;font-size:12.5px;color:var(--text-muted);margin-bottom:5px;}
+.bar-track{height:8px;background:var(--panel-raised);position:relative;overflow:hidden;}
+.bar-fill{height:100%;position:absolute;left:0;top:0;}
+.bar-fill.f{background:var(--f-color);}
+.bar-fill.m{background:var(--m-color);}
+.bar-fill.warn{background:var(--enemy);}
+.bar-fill.ok{background:var(--ally);}
+.threat-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px;}
+.threat-list li{font-size:13.5px;color:var(--text-muted);display:flex;gap:10px;align-items:flex-start;}
+.threat-list li .dot{width:6px;height:6px;border-radius:50%;background:var(--enemy);margin-top:6px;flex-shrink:0;}
+.threat-list li.good .dot{background:var(--ally);}
+
+.build-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+@media (max-width:820px){.build-cols{grid-template-columns:1fr;}}
+.build-col h5{font-size:12px;text-transform:uppercase;color:var(--text-muted);letter-spacing:.05em;margin-bottom:10px;}
+.build-item{border:1px solid var(--panel-line);background:var(--panel-raised);padding:12px;margin-bottom:10px;}
+.build-item .biname{font-weight:700;font-size:13.5px;color:var(--gold-bright);margin-bottom:5px;}
+.build-item .bireason{font-size:12px;color:var(--text-muted);line-height:1.5;}
+.relic-row{display:flex;gap:12px;flex-wrap:wrap;}
+.relic-chip{border:1px solid var(--panel-line);background:var(--panel-raised);padding:10px 14px;flex:1;min-width:220px;}
+.relic-chip b{color:var(--gold-bright);font-size:13.5px;display:block;margin-bottom:4px;}
+.relic-chip span{font-size:12px;color:var(--text-muted);}
+
+.notice{border:1px solid var(--panel-line);background:var(--panel);padding:14px 18px;font-size:12.8px;color:var(--text-muted);margin-top:30px;line-height:1.6;}
+.notice b{color:var(--gold);}
+
+footer{text-align:center;padding:30px;color:var(--text-faint);font-size:12px;border-top:1px solid var(--panel-line);}
+
+::-webkit-scrollbar{height:8px;width:8px;}
+::-webkit-scrollbar-thumb{background:var(--panel-line);}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-mark"><span>Σ</span></div>
+    <div class="brand-text">
+      <h1 data-i18n="brandName">Ascendant</h1>
+      <p data-i18n="brandSub">Coach de Smite 2 para nuevos jugadores</p>
+    </div>
+  </div>
+  <div class="lang-switch">
+    <button id="btn-es" class="active" onclick="setLang('es')"><span class="flag">🇪🇸</span> ES</button>
+    <button id="btn-en" onclick="setLang('en')"><span class="flag">🇬🇧</span> EN</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="inicio" data-i18n="tabHome">Inicio</button>
+  <button class="tab-btn" data-tab="dioses" data-i18n="tabGods">Dioses</button>
+  <button class="tab-btn" data-tab="items" data-i18n="tabItems">Objetos</button>
+  <button class="tab-btn" data-tab="builder" data-i18n="tabBuilder">Constructor de equipo</button>
+  <button class="tab-btn" data-tab="modos" data-i18n="tabModes">Modos de juego</button>
+</div>
+
+<main>
+
+  <!-- ============ INICIO ============ -->
+  <section class="view active" id="view-inicio">
+    <div class="hero">
+      <div>
+        <h2 data-i18n="heroTitle">Tu <em>coach</em> personal para dominar Smite 2</h2>
+        <p data-i18n="heroText">Elegí tu dios, cargá el equipo aliado y el enemigo, y te decimos exactamente qué construir, por qué, y cómo ganar el matchup — pensado para jugadores que recién arrancan.</p>
+        <button class="hero-cta" onclick="goTab('builder')" data-i18n="heroCta">Analizar mi partida →</button>
+      </div>
+      <div class="hero-panel">
+        <h3 data-i18n="heroPanelTitle">Cobertura de la app</h3>
+        <div class="hero-stat-row"><span data-i18n="statGods">Dioses cubiertos</span><b id="stat-gods">90</b></div>
+        <div class="hero-stat-row"><span data-i18n="statItems">Objetos curados</span><b id="stat-items">66</b></div>
+        <div class="hero-stat-row"><span data-i18n="statModes">Modos de juego</span><b>6</b></div>
+        <div class="hero-stat-row"><span data-i18n="statRoles">Roles soportados</span><b data-i18n="statRolesVal">5</b></div>
+      </div>
+    </div>
+
+    <div class="section-title"><span data-i18n="howTitle">Cómo funciona</span><div class="rule"></div></div>
+    <div class="mode-grid">
+      <div class="mode-card"><h4 data-i18n="how1t">1. Elegís tu dios y rol</h4><p data-i18n="how1d">Seleccioná con quién vas a jugar y en qué posición (soporte, mid, jungla, solo o carry).</p></div>
+      <div class="mode-card"><h4 data-i18n="how2t">2. Cargás ambos equipos</h4><p data-i18n="how2d">Metés a tus aliados y a los enemigos que ya sabés que vas a enfrentar (o los que vayan apareciendo en la selección).</p></div>
+      <div class="mode-card"><h4 data-i18n="how3t">3. Analizás la partida</h4><p data-i18n="how3d">El motor lee la composición enemiga: cuánto daño físico/mágico tiene, cuánto control, movilidad y sustain.</p></div>
+      <div class="mode-card"><h4 data-i18n="how4t">4. Recibís tu build</h4><p data-i18n="how4d">Te armamos un inicial, un núcleo de 5 items y las mejores reliquias, con el porqué de cada elección.</p></div>
+    </div>
+
+    <div class="notice" data-i18n="homeNotice">
+      <b>Nota:</b> los datos de dioses e items de esta app están curados a mano usando la mecánica del juego (tipo de daño, control, movilidad, sustain) y la información pública de smite2.com y wiki.smite2.com. No reflejan winrates en vivo del parche actual — conviene revisar patch notes si algo cambió recientemente.
+    </div>
+  </section>
+
+  <!-- ============ DIOSES ============ -->
+  <section class="view" id="view-dioses">
+    <h2 class="display" style="font-size:24px;margin-bottom:6px;" data-i18n="godsTitle">Roster de dioses</h2>
+    <p style="color:var(--text-muted);font-size:14px;margin:0 0 20px;" data-i18n="godsSub">Tocá un dios para ver su perfil de counters y qué builds lo frenan.</p>
+    <div class="filters">
+      <input type="text" id="god-search" data-i18n-ph="godSearchPh" placeholder="Buscar dios...">
+      <select id="filter-role"></select>
+      <select id="filter-dmg"></select>
+    </div>
+    <div class="god-grid" id="god-grid"></div>
+  </section>
+
+  <!-- ============ ITEMS ============ -->
+  <section class="view" id="view-items">
+    <h2 class="display" style="font-size:24px;margin-bottom:6px;" data-i18n="itemsTitle">Objetos</h2>
+    <p style="color:var(--text-muted);font-size:14px;margin:0 0 20px;" data-i18n="itemsSub">Base de items curada: iniciales, ofensivos, defensivos, híbridos y reliquias.</p>
+    <div class="item-tabs" id="item-tabs"></div>
+    <div class="item-grid" id="item-grid"></div>
+  </section>
+
+  <!-- ============ BUILDER ============ -->
+  <section class="view" id="view-builder">
+    <h2 class="display" style="font-size:24px;margin-bottom:6px;" data-i18n="builderTitle">Constructor de equipo</h2>
+    <p style="color:var(--text-muted);font-size:14px;margin:0 0 24px;" data-i18n="builderSub">Cargá tu dios y rol, tu equipo, y el equipo enemigo. Después tocá analizar.</p>
+
+    <div class="builder-grid">
+      <div class="team-panel ally">
+        <h3 data-i18n="allyTitle">🛡 Tu equipo</h3>
+        <div class="slot-row you-row">
+          <select id="my-god"></select>
+          <select id="my-role" class="role-sel"></select>
+        </div>
+        <div id="ally-slots"></div>
+      </div>
+      <div class="team-panel enemy">
+        <h3 data-i18n="enemyTitle">⚔ Equipo enemigo</h3>
+        <div id="enemy-slots"></div>
+      </div>
+    </div>
+
+    <div class="analyze-wrap">
+      <button class="analyze-btn" id="analyze-btn" onclick="analyzeMatch()" data-i18n="analyzeBtn">Analizar partida</button>
+    </div>
+
+    <div class="results" id="results"></div>
+  </section>
+
+  <!-- ============ MODOS ============ -->
+  <section class="view" id="view-modos">
+    <h2 class="display" style="font-size:24px;margin-bottom:6px;" data-i18n="modesTitle">Modos de juego</h2>
+    <p style="color:var(--text-muted);font-size:14px;margin:0 0 20px;" data-i18n="modesSub">Un resumen rápido de cada modo para saber a qué te metés.</p>
+    <div class="mode-grid" id="modes-grid"></div>
+  </section>
+
+</main>
+
+<footer data-i18n="footerText">Ascendant no es un producto oficial de Hi-Rez Studios. Datos curados con fines educativos para nuevos jugadores de Smite 2.</footer>
+
+<!-- modal detalle de dios -->
+<div class="modal-bg" id="god-modal-bg" onclick="if(event.target===this) closeGodModal()">
+  <div class="modal" id="god-modal"></div>
+</div>
+
+<script>
+const GODS = [{"id": "achilles", "name": "Achilles", "pantheon": "Greek", "attack": "melee", "dmg": "F", "role": "solo", "tags": {"cc": 1, "mobility": 2, "sustain": 2, "burst": 1, "poke": 1, "tank": 2}, "icon": "https://wiki.smite2.com/images/thumb/T_Achilles(S2)_Default_Icon.png/60px-T_Achilles(S2)_Default_Icon.png", "pantheon_es": "Griego"}, {"id": "agni", "name": "Agni", "pantheon": "Hindu", "attack": "ranged", "dmg": "M", "role": "mid", "tags": {"cc": 2, "mobility": 1, "sustain": 0, "burst": 2, "poke": 3, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Agni(S2)_Default_Icon.png/60px-T_Agni(S2)_Default_Icon.png", "pantheon_es": "Hindú"}, {"id": "ah-puch", "name": "Ah Puch", "pantheon": "Maya", "attack": "ranged", "dmg": "M", "role": "mid", "tags": {"cc": 1, "mobility": 1, "sustain": 1, "burst": 3, "poke": 3, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Ah_Puch(S2)_Default_Icon.png/60px-T_Ah_Puch(S2)_Default_Icon.png", "pantheon_es": "Maya"}, {"id": "aladdin", "name": "Aladdin", "pantheon": "Tales of Arabia", "attack": "melee", "dmg": "M", "role": "jungla", "tags": {"cc": 1, "mobility": 2, "sustain": 1, "burst": 3, "poke": 0, "tank": 1}, "icon": "https://wiki.smite2.com/images/thumb/T_Aladdin(S2)_Default_Icon.png/60px-T_Aladdin(S2)_Default_Icon.png", "pantheon_es": "Cuentos de Arabia"}, {"id": "amaterasu", "name": "Amaterasu", "pantheon": "Japanese", "attack": "melee", "dmg": "F", "role": "solo", "tags": {"cc": 1, "mobility": 1, "sustain": 2, "burst": 1, "poke": 1, "tank": 3}, "icon": "https://wiki.smite2.com/images/thumb/T_Amaterasu(S2)_Default_Icon.png/60px-T_Amaterasu(S2)_Default_Icon.png", "pantheon_es": "Japonés"}, {"id": "anhur", "name": "Anhur", "pantheon": "Egyptian", "attack": "ranged", "dmg": "F", "role": "carry", "tags": {"cc": 0, "mobility": 1, "sustain": 1, "burst": 2, "poke": 1, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Anhur(S2)_Default_Icon.png/60px-T_Anhur(S2)_Default_Icon.png", "pantheon_es": "Egipcio"}, {"id": "anubis", "name": "Anubis", "pantheon": "Egyptian", "attack": "ranged", "dmg": "M", "role": "mid", "tags": {"cc": 1, "mobility": 1, "sustain": 1, "burst": 2, "poke": 3, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Anubis(S2)_Default_Icon.png/60px-T_Anubis(S2)_Default_Icon.png", "pantheon_es": "Egipcio"}, {"id": "aphrodite", "name": "Aphrodite", "pantheon": "Greek", "attack": "ranged", "dmg": "M", "role": "mid", "tags": {"cc": 1, "mobility": 1, "sustain": 2, "burst": 2, "poke": 1, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Aphrodite(S2)_Default_Icon.png/60px-T_Aphrodite(S2)_Default_Icon.png", "pantheon_es": "Griego"}, {"id": "apollo", "name": "Apollo", "pantheon": "Greek", "attack": "ranged", "dmg": "F", "role": "carry", "tags": {"cc": 0, "mobility": 1, "sustain": 1, "burst": 1, "poke": 1, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Apollo(S2)_Default_Icon.png/60px-T_Apollo(S2)_Default_Icon.png", "pantheon_es": "Griego"}, {"id": "ares", "name": "Ares", "pantheon": "Greek", "attack": "melee", "dmg": "M", "role": "support", "tags": {"cc": 3, "mobility": 0, "sustain": 2, "burst": 0, "poke": 0, "tank": 2}, "icon": "https://wiki.smite2.com/images/thumb/T_Ares(S2)_Default_Icon.png/60px-T_Ares(S2)_Default_Icon.png", "pantheon_es": "Griego"}, {"id": "artemis", "name": "Artemis", "pantheon": "Greek", "attack": "ranged", "dmg": "F", "role": "carry", "tags": {"cc": 0, "mobility": 1, "sustain": 1, "burst": 1, "poke": 2, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Artemis(S2)_Default_Icon.png/60px-T_Artemis(S2)_Default_Icon.png", "pantheon_es": "Griego"}, {"id": "artio", "name": "Artio", "pantheon": "Celtic", "attack": "ranged", "dmg": "M", "role": "solo", "tags": {"cc": 1, "mobility": 1, "sustain": 2, "burst": 1, "poke": 1, "tank": 2}, "icon": "https://wiki.smite2.com/images/thumb/T_Artio(S2)_Default_Icon.png/60px-T_Artio(S2)_Default_Icon.png", "pantheon_es": "Celta"}, {"id": "athena", "name": "Athena", "pantheon": "Greek", "attack": "melee", "dmg": "M", "role": "support", "tags": {"cc": 3, "mobility": 2, "sustain": 2, "burst": 0, "poke": 0, "tank": 2}, "icon": "https://wiki.smite2.com/images/thumb/T_Athena(S2)_Default_Icon.png/60px-T_Athena(S2)_Default_Icon.png", "pantheon_es": "Griego"}, {"id": "atlas", "name": "Atlas", "pantheon": "Greek", "attack": "melee", "dmg": "M", "role": "support", "tags": {"cc": 2, "mobility": 1, "sustain": 2, "burst": 0, "poke": 0, "tank": 2}, "icon": "https://wiki.smite2.com/images/thumb/T_Atlas(S2)_Default_Icon.png/60px-T_Atlas(S2)_Default_Icon.png", "pantheon_es": "Griego"}, {"id": "awilix", "name": "Awilix", "pantheon": "Maya", "attack": "melee", "dmg": "F", "role": "jungla", "tags": {"cc": 1, "mobility": 3, "sustain": 1, "burst": 2, "poke": 0, "tank": 1}, "icon": "https://wiki.smite2.com/images/thumb/T_Awilix(S2)_Default_Icon.png/60px-T_Awilix(S2)_Default_Icon.png", "pantheon_es": "Maya"}, {"id": "bacchus", "name": "Bacchus", "pantheon": "Roman", "attack": "melee", "dmg": "M", "role": "support", "tags": {"cc": 3, "mobility": 1, "sustain": 2, "burst": 0, "poke": 0, "tank": 3}, "icon": "https://wiki.smite2.com/images/thumb/T_Bacchus(S2)_Default_Icon.png/60px-T_Bacchus(S2)_Default_Icon.png", "pantheon_es": "Romano"}, {"id": "baron-samedi", "name": "Baron Samedi", "pantheon": "Voodoo", "attack": "ranged", "dmg": "M", "role": "mid", "tags": {"cc": 1, "mobility": 1, "sustain": 1, "burst": 1, "poke": 3, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Baron_Samedi(S2)_Default_Icon.png/60px-T_Baron_Samedi(S2)_Default_Icon.png", "pantheon_es": "Vudú"}, {"id": "bastet", "name": "Bastet", "pantheon": "Egyptian", "attack": "melee", "dmg": "F", "role": "jungla", "tags": {"cc": 1, "mobility": 2, "sustain": 1, "burst": 2, "poke": 0, "tank": 1}, "icon": "https://wiki.smite2.com/images/thumb/T_Bastet(S2)_Default_Icon.png/60px-T_Bastet(S2)_Default_Icon.png", "pantheon_es": "Egipcio"}, {"id": "bellona", "name": "Bellona", "pantheon": "Roman", "attack": "melee", "dmg": "F", "role": "solo", "tags": {"cc": 1, "mobility": 1, "sustain": 2, "burst": 1, "poke": 1, "tank": 2}, "icon": "https://wiki.smite2.com/images/thumb/T_Bellona(S2)_Default_Icon.png/60px-T_Bellona(S2)_Default_Icon.png", "pantheon_es": "Romano"}, {"id": "cabrakan", "name": "Cabrakan", "pantheon": "Maya", "attack": "melee", "dmg": "M", "role": "solo", "tags": {"cc": 3, "mobility": 1, "sustain": 2, "burst": 1, "poke": 1, "tank": 3}, "icon": "https://wiki.smite2.com/images/thumb/T_Cabrakan(S2)_Default_Icon.png/60px-T_Cabrakan(S2)_Default_Icon.png", "pantheon_es": "Maya"}, {"id": "cerberus", "name": "Cerberus", "pantheon": "Greek", "attack": "melee", "dmg": "M", "role": "solo", "tags": {"cc": 2, "mobility": 1, "sustain": 2, "burst": 1, "poke": 1, "tank": 3}, "icon": "https://wiki.smite2.com/images/thumb/T_Cerberus(S2)_Default_Icon.png/60px-T_Cerberus(S2)_Default_Icon.png", "pantheon_es": "Griego"}, {"id": "cernunnos", "name": "Cernunnos", "pantheon": "Celtic", "attack": "ranged", "dmg": "F", "role": "carry", "tags": {"cc": 0, "mobility": 1, "sustain": 1, "burst": 1, "poke": 2, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Cernunnos(S2)_Default_Icon.png/60px-T_Cernunnos(S2)_Default_Icon.png", "pantheon_es": "Celta"}, {"id": "chaac", "name": "Chaac", "pantheon": "Maya", "attack": "melee", "dmg": "F", "role": "solo", "tags": {"cc": 1, "mobility": 1, "sustain": 2, "burst": 1, "poke": 1, "tank": 3}, "icon": "https://wiki.smite2.com/images/thumb/T_Chaac(S2)_Default_Icon.png/60px-T_Chaac(S2)_Default_Icon.png", "pantheon_es": "Maya"}, {"id": "charon", "name": "Charon", "pantheon": "Greek", "attack": "ranged", "dmg": "M", "role": "support", "tags": {"cc": 2, "mobility": 1, "sustain": 2, "burst": 0, "poke": 0, "tank": 1}, "icon": "https://wiki.smite2.com/images/thumb/T_Charon(S2)_Default_Icon.png/60px-T_Charon(S2)_Default_Icon.png", "pantheon_es": "Griego"}, {"id": "chiron", "name": "Chiron", "pantheon": "Greek", "attack": "ranged", "dmg": "F", "role": "carry", "tags": {"cc": 0, "mobility": 1, "sustain": 1, "burst": 2, "poke": 2, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Chiron(S2)_Default_Icon.png/60px-T_Chiron(S2)_Default_Icon.png", "pantheon_es": "Griego"}, {"id": "chronos", "name": "Chronos", "pantheon": "Greek", "attack": "ranged", "dmg": "M", "role": "mid", "tags": {"cc": 1, "mobility": 1, "sustain": 0, "burst": 3, "poke": 1, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Chronos(S2)_Default_Icon.png/60px-T_Chronos(S2)_Default_Icon.png", "pantheon_es": "Griego"}, {"id": "cu-chulainn", "name": "Cu Chulainn", "pantheon": "Celtic", "attack": "melee", "dmg": "F", "role": "solo", "tags": {"cc": 1, "mobility": 1, "sustain": 2, "burst": 1, "poke": 1, "tank": 3}, "icon": "https://wiki.smite2.com/images/thumb/T_Cu_Chulainn(S2)_Default_Icon.png/60px-T_Cu_Chulainn(S2)_Default_Icon.png", "pantheon_es": "Celta"}, {"id": "cupid", "name": "Cupid", "pantheon": "Roman", "attack": "ranged", "dmg": "F", "role": "carry", "tags": {"cc": 1, "mobility": 1, "sustain": 1, "burst": 2, "poke": 1, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Cupid(S2)_Default_Icon.png/60px-T_Cupid(S2)_Default_Icon.png", "pantheon_es": "Romano"}, {"id": "da-ji", "name": "Da Ji", "pantheon": "Chinese", "attack": "melee", "dmg": "F", "role": "jungla", "tags": {"cc": 1, "mobility": 2, "sustain": 1, "burst": 3, "poke": 0, "tank": 1}, "icon": "https://wiki.smite2.com/images/thumb/T_Da_Ji(S2)_Default_Icon.png/60px-T_Da_Ji(S2)_Default_Icon.png", "pantheon_es": "Chino"}, {"id": "danzaburou", "name": "Danzaburou", "pantheon": "Japanese", "attack": "ranged", "dmg": "F", "role": "carry", "tags": {"cc": 0, "mobility": 1, "sustain": 1, "burst": 1, "poke": 1, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Danzaburou(S2)_Default_Icon.png/60px-T_Danzaburou(S2)_Default_Icon.png", "pantheon_es": "Japonés"}, {"id": "discordia", "name": "Discordia", "pantheon": "Roman", "attack": "ranged", "dmg": "M", "role": "mid", "tags": {"cc": 1, "mobility": 1, "sustain": 0, "burst": 2, "poke": 3, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Discordia(S2)_Default_Icon.png/60px-T_Discordia(S2)_Default_Icon.png", "pantheon_es": "Romano"}, {"id": "eset", "name": "Eset", "pantheon": "Egyptian", "attack": "ranged", "dmg": "M", "role": "mid", "tags": {"cc": 1, "mobility": 1, "sustain": 0, "burst": 2, "poke": 3, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Eset(S2)_Default_Icon.png/60px-T_Eset(S2)_Default_Icon.png", "pantheon_es": "Egipcio"}, {"id": "fenrir", "name": "Fenrir", "pantheon": "Norse", "attack": "melee", "dmg": "F", "role": "jungla", "tags": {"cc": 1, "mobility": 3, "sustain": 1, "burst": 3, "poke": 0, "tank": 1}, "icon": "https://wiki.smite2.com/images/thumb/T_Fenrir(S2)_Default_Icon.png/60px-T_Fenrir(S2)_Default_Icon.png", "pantheon_es": "Nórdico"}, {"id": "ganesha", "name": "Ganesha", "pantheon": "Hindu", "attack": "melee", "dmg": "M", "role": "support", "tags": {"cc": 3, "mobility": 1, "sustain": 2, "burst": 0, "poke": 0, "tank": 3}, "icon": "https://wiki.smite2.com/images/thumb/T_Ganesha_Default_Icon.png/60px-T_Ganesha_Default_Icon.png", "pantheon_es": "Hindú"}, {"id": "geb", "name": "Geb", "pantheon": "Egyptian", "attack": "melee", "dmg": "M", "role": "support", "tags": {"cc": 2, "mobility": 1, "sustain": 1, "burst": 0, "poke": 0, "tank": 3}, "icon": "https://wiki.smite2.com/images/thumb/T_Geb(S2)_Default_Icon.png/60px-T_Geb(S2)_Default_Icon.png", "pantheon_es": "Egipcio"}, {"id": "gilgamesh", "name": "Gilgamesh", "pantheon": "Babylonian", "attack": "melee", "dmg": "F", "role": "solo", "tags": {"cc": 2, "mobility": 1, "sustain": 2, "burst": 1, "poke": 1, "tank": 3}, "icon": "https://wiki.smite2.com/images/thumb/T_Gilgamesh(S2)_Default_Icon.png/60px-T_Gilgamesh(S2)_Default_Icon.png", "pantheon_es": "Babilónico"}, {"id": "guan-yu", "name": "Guan Yu", "pantheon": "Chinese", "attack": "melee", "dmg": "F", "role": "solo", "tags": {"cc": 2, "mobility": 1, "sustain": 2, "burst": 1, "poke": 1, "tank": 3}, "icon": "https://wiki.smite2.com/images/thumb/T_Guan_Yu(S2)_Default_Icon.png/60px-T_Guan_Yu(S2)_Default_Icon.png", "pantheon_es": "Chino"}, {"id": "hades", "name": "Hades", "pantheon": "Greek", "attack": "ranged", "dmg": "M", "role": "solo", "tags": {"cc": 2, "mobility": 1, "sustain": 1, "burst": 2, "poke": 1, "tank": 3}, "icon": "https://wiki.smite2.com/images/thumb/T_Hades(S2)_Default_Icon.png/60px-T_Hades(S2)_Default_Icon.png", "pantheon_es": "Griego"}, {"id": "hecate", "name": "Hecate", "pantheon": "Greek", "attack": "ranged", "dmg": "M", "role": "mid", "tags": {"cc": 1, "mobility": 1, "sustain": 0, "burst": 2, "poke": 2, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Hecate(S2)_Default_Icon.png/60px-T_Hecate(S2)_Default_Icon.png", "pantheon_es": "Griego"}, {"id": "hercules", "name": "Hercules", "pantheon": "Roman", "attack": "melee", "dmg": "F", "role": "solo", "tags": {"cc": 2, "mobility": 1, "sustain": 2, "burst": 1, "poke": 1, "tank": 3}, "icon": "https://wiki.smite2.com/images/thumb/T_Hercules(S2)_Default_Icon.png/60px-T_Hercules(S2)_Default_Icon.png", "pantheon_es": "Romano"}, {"id": "horus", "name": "Horus", "pantheon": "Egyptian", "attack": "melee", "dmg": "F", "role": "support", "tags": {"cc": 3, "mobility": 1, "sustain": 2, "burst": 0, "poke": 0, "tank": 3}, "icon": "https://wiki.smite2.com/images/thumb/T_Horus(S2)_Default_Icon.png/60px-T_Horus(S2)_Default_Icon.png", "pantheon_es": "Egipcio"}, {"id": "hou-yi", "name": "Hou Yi", "pantheon": "Chinese", "attack": "ranged", "dmg": "F", "role": "carry", "tags": {"cc": 0, "mobility": 1, "sustain": 1, "burst": 2, "poke": 1, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Hou_Yi(S2)_Default_Icon.png/60px-T_Hou_Yi(S2)_Default_Icon.png", "pantheon_es": "Chino"}, {"id": "hua-mulan", "name": "Hua Mulan", "pantheon": "Chinese", "attack": "melee", "dmg": "F", "role": "solo", "tags": {"cc": 1, "mobility": 1, "sustain": 2, "burst": 1, "poke": 1, "tank": 2}, "icon": "https://wiki.smite2.com/images/thumb/T_Hua_Mulan(S2)_Default_Icon.png/60px-T_Hua_Mulan(S2)_Default_Icon.png", "pantheon_es": "Chino"}, {"id": "hun-batz", "name": "Hun Batz", "pantheon": "Maya", "attack": "melee", "dmg": "F", "role": "jungla", "tags": {"cc": 1, "mobility": 2, "sustain": 1, "burst": 2, "poke": 0, "tank": 1}, "icon": "https://wiki.smite2.com/images/thumb/T_Hun_Batz(S2)_Default_Icon.png/60px-T_Hun_Batz(S2)_Default_Icon.png", "pantheon_es": "Maya"}, {"id": "ishtar", "name": "Ishtar", "pantheon": "Babylonian", "attack": "ranged", "dmg": "F", "role": "carry", "tags": {"cc": 0, "mobility": 1, "sustain": 1, "burst": 2, "poke": 1, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Ishtar(S2)_Default_Icon.png/60px-T_Ishtar(S2)_Default_Icon.png", "pantheon_es": "Babilónico"}, {"id": "ix-chel", "name": "Ix Chel", "pantheon": "Maya", "attack": "ranged", "dmg": "M", "role": "mid", "tags": {"cc": 1, "mobility": 1, "sustain": 0, "burst": 2, "poke": 3, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Ix_Chel(S2)_Default_Icon.png/60px-T_Ix_Chel(S2)_Default_Icon.png", "pantheon_es": "Maya"}, {"id": "izanami", "name": "Izanami", "pantheon": "Japanese", "attack": "ranged", "dmg": "F", "role": "carry", "tags": {"cc": 0, "mobility": 1, "sustain": 1, "burst": 2, "poke": 1, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Izanami(S2)_Default_Icon.png/60px-T_Izanami(S2)_Default_Icon.png", "pantheon_es": "Japonés"}, {"id": "janus", "name": "Janus", "pantheon": "Roman", "attack": "ranged", "dmg": "M", "role": "mid", "tags": {"cc": 1, "mobility": 1, "sustain": 0, "burst": 2, "poke": 1, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Janus(S2)_Default_Icon.png/60px-T_Janus(S2)_Default_Icon.png", "pantheon_es": "Romano"}, {"id": "jing-wei", "name": "Jing Wei", "pantheon": "Chinese", "attack": "ranged", "dmg": "F", "role": "carry", "tags": {"cc": 0, "mobility": 1, "sustain": 1, "burst": 1, "poke": 1, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Jing_Wei(S2)_Default_Icon.png/60px-T_Jing_Wei(S2)_Default_Icon.png", "pantheon_es": "Chino"}, {"id": "jormungandr", "name": "Jormungandr", "pantheon": "Norse", "attack": "melee", "dmg": "M", "role": "solo", "tags": {"cc": 2, "mobility": 1, "sustain": 2, "burst": 1, "poke": 1, "tank": 3}, "icon": "https://wiki.smite2.com/images/thumb/T_Jormungandr(S2)_Default_Icon.png/60px-T_Jormungandr(S2)_Default_Icon.png", "pantheon_es": "Nórdico"}, {"id": "kali", "name": "Kali", "pantheon": "Hindu", "attack": "melee", "dmg": "F", "role": "jungla", "tags": {"cc": 1, "mobility": 1, "sustain": 1, "burst": 3, "poke": 0, "tank": 1}, "icon": "https://wiki.smite2.com/images/thumb/T_Kali(S2)_Default_Icon.png/60px-T_Kali(S2)_Default_Icon.png", "pantheon_es": "Hindú"}, {"id": "khepri", "name": "Khepri", "pantheon": "Egyptian", "attack": "melee", "dmg": "M", "role": "support", "tags": {"cc": 3, "mobility": 1, "sustain": 2, "burst": 0, "poke": 0, "tank": 2}, "icon": "https://wiki.smite2.com/images/thumb/T_Khepri(S2)_Default_Icon.png/60px-T_Khepri(S2)_Default_Icon.png", "pantheon_es": "Egipcio"}, {"id": "kukulkan", "name": "Kukulkan", "pantheon": "Maya", "attack": "ranged", "dmg": "M", "role": "mid", "tags": {"cc": 1, "mobility": 1, "sustain": 0, "burst": 1, "poke": 3, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Kukulkan(S2)_Default_Icon.png/60px-T_Kukulkan(S2)_Default_Icon.png", "pantheon_es": "Maya"}, {"id": "loki", "name": "Loki", "pantheon": "Norse", "attack": "melee", "dmg": "F", "role": "jungla", "tags": {"cc": 1, "mobility": 2, "sustain": 1, "burst": 3, "poke": 0, "tank": 1}, "icon": "https://wiki.smite2.com/images/thumb/T_Loki(S2)_Default_Icon.png/60px-T_Loki(S2)_Default_Icon.png", "pantheon_es": "Nórdico"}, {"id": "medusa", "name": "Medusa", "pantheon": "Greek", "attack": "ranged", "dmg": "F", "role": "carry", "tags": {"cc": 1, "mobility": 1, "sustain": 1, "burst": 2, "poke": 1, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Medusa(S2)_Default_Icon.png/60px-T_Medusa(S2)_Default_Icon.png", "pantheon_es": "Griego"}, {"id": "mercury", "name": "Mercury", "pantheon": "Roman", "attack": "melee", "dmg": "F", "role": "jungla", "tags": {"cc": 1, "mobility": 3, "sustain": 1, "burst": 1, "poke": 0, "tank": 1}, "icon": "https://wiki.smite2.com/images/thumb/T_Mercury(S2)_Default_Icon.png/60px-T_Mercury(S2)_Default_Icon.png", "pantheon_es": "Romano"}, {"id": "merlin", "name": "Merlin", "pantheon": "Arthurian", "attack": "ranged", "dmg": "M", "role": "mid", "tags": {"cc": 1, "mobility": 1, "sustain": 0, "burst": 3, "poke": 2, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Merlin(S2)_Default_Icon.png/60px-T_Merlin(S2)_Default_Icon.png", "pantheon_es": "Artúrico"}, {"id": "mordred", "name": "Mordred", "pantheon": "Arthurian", "attack": "melee", "dmg": "F", "role": "solo", "tags": {"cc": 2, "mobility": 2, "sustain": 2, "burst": 2, "poke": 1, "tank": 3}, "icon": "https://wiki.smite2.com/images/thumb/T_Mordred(S2)_Default_Icon.png/60px-T_Mordred(S2)_Default_Icon.png", "pantheon_es": "Artúrico"}, {"id": "morgan-le-fay", "name": "Morgan Le Fay", "pantheon": "Arthurian", "attack": "ranged", "dmg": "M", "role": "mid", "tags": {"cc": 1, "mobility": 1, "sustain": 0, "burst": 2, "poke": 3, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Morgan_Le_Fay(S2)_Default_Icon.png/60px-T_Morgan_Le_Fay(S2)_Default_Icon.png", "pantheon_es": "Artúrico"}, {"id": "ne-zha", "name": "Ne Zha", "pantheon": "Chinese", "attack": "melee", "dmg": "F", "role": "jungla", "tags": {"cc": 1, "mobility": 2, "sustain": 1, "burst": 2, "poke": 0, "tank": 1}, "icon": "https://wiki.smite2.com/images/thumb/T_Ne_Zha(S2)_Default_Icon.png/60px-T_Ne_Zha(S2)_Default_Icon.png", "pantheon_es": "Chino"}, {"id": "neith", "name": "Neith", "pantheon": "Egyptian", "attack": "ranged", "dmg": "F", "role": "carry", "tags": {"cc": 1, "mobility": 1, "sustain": 1, "burst": 2, "poke": 2, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Neith(S2)_Default_Icon.png/60px-T_Neith(S2)_Default_Icon.png", "pantheon_es": "Egipcio"}, {"id": "nemesis", "name": "Nemesis", "pantheon": "Greek", "attack": "melee", "dmg": "F", "role": "jungla", "tags": {"cc": 1, "mobility": 2, "sustain": 1, "burst": 3, "poke": 0, "tank": 1}, "icon": "https://wiki.smite2.com/images/thumb/T_Nemesis(S2)_Default_Icon.png/60px-T_Nemesis(S2)_Default_Icon.png", "pantheon_es": "Griego"}, {"id": "nu-wa", "name": "Nu Wa", "pantheon": "Chinese", "attack": "ranged", "dmg": "M", "role": "mid", "tags": {"cc": 1, "mobility": 1, "sustain": 0, "burst": 2, "poke": 2, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Nu_Wa(S2)_Default_Icon.png/60px-T_Nu_Wa(S2)_Default_Icon.png", "pantheon_es": "Chino"}, {"id": "nut", "name": "Nut", "pantheon": "Egyptian", "attack": "ranged", "dmg": "M", "role": "carry", "tags": {"cc": 0, "mobility": 1, "sustain": 1, "burst": 2, "poke": 1, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Nut(S2)_Default_Icon.png/60px-T_Nut(S2)_Default_Icon.png", "pantheon_es": "Egipcio"}, {"id": "odin", "name": "Odin", "pantheon": "Norse", "attack": "melee", "dmg": "F", "role": "solo", "tags": {"cc": 2, "mobility": 1, "sustain": 2, "burst": 1, "poke": 1, "tank": 3}, "icon": "https://wiki.smite2.com/images/thumb/T_Odin(S2)_Default_Icon.png/60px-T_Odin(S2)_Default_Icon.png", "pantheon_es": "Nórdico"}, {"id": "osiris", "name": "Osiris", "pantheon": "Egyptian", "attack": "melee", "dmg": "F", "role": "solo", "tags": {"cc": 1, "mobility": 1, "sustain": 1, "burst": 1, "poke": 1, "tank": 2}, "icon": "https://wiki.smite2.com/images/thumb/T_Osiris(S2)_Default_Icon.png/60px-T_Osiris(S2)_Default_Icon.png", "pantheon_es": "Egipcio"}, {"id": "pele", "name": "Pele", "pantheon": "Polynesian", "attack": "melee", "dmg": "F", "role": "jungla", "tags": {"cc": 1, "mobility": 2, "sustain": 1, "burst": 1, "poke": 0, "tank": 1}, "icon": "https://wiki.smite2.com/images/thumb/T_Pele(S2)_Default_Icon.png/60px-T_Pele(S2)_Default_Icon.png", "pantheon_es": "Polinesio"}, {"id": "poseidon", "name": "Poseidon", "pantheon": "Greek", "attack": "ranged", "dmg": "M", "role": "mid", "tags": {"cc": 2, "mobility": 1, "sustain": 0, "burst": 2, "poke": 2, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Poseidon(S2)_Default_Icon.png/60px-T_Poseidon(S2)_Default_Icon.png", "pantheon_es": "Griego"}, {"id": "princess-bari", "name": "Princess Bari", "pantheon": "Korean", "attack": "ranged", "dmg": "M", "role": "carry", "tags": {"cc": 0, "mobility": 1, "sustain": 2, "burst": 2, "poke": 1, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Princess_Bari(S2)_Default_Icon.png/60px-T_Princess_Bari(S2)_Default_Icon.png", "pantheon_es": "Coreano"}, {"id": "ra", "name": "Ra", "pantheon": "Egyptian", "attack": "ranged", "dmg": "M", "role": "mid", "tags": {"cc": 1, "mobility": 1, "sustain": 1, "burst": 2, "poke": 3, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Ra(S2)_Default_Icon.png/60px-T_Ra(S2)_Default_Icon.png", "pantheon_es": "Egipcio"}, {"id": "rama", "name": "Rama", "pantheon": "Hindu", "attack": "ranged", "dmg": "F", "role": "carry", "tags": {"cc": 0, "mobility": 1, "sustain": 1, "burst": 1, "poke": 1, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Rama(S2)_Default_Icon.png/60px-T_Rama(S2)_Default_Icon.png", "pantheon_es": "Hindú"}, {"id": "ratatoskr", "name": "Ratatoskr", "pantheon": "Norse", "attack": "melee", "dmg": "F", "role": "jungla", "tags": {"cc": 1, "mobility": 3, "sustain": 1, "burst": 1, "poke": 0, "tank": 1}, "icon": "https://wiki.smite2.com/images/thumb/T_Ratatoskr(S2)_Default_Icon.png/60px-T_Ratatoskr(S2)_Default_Icon.png", "pantheon_es": "Nórdico"}, {"id": "ravana", "name": "Ravana", "pantheon": "Hindu", "attack": "melee", "dmg": "F", "role": "jungla", "tags": {"cc": 1, "mobility": 1, "sustain": 1, "burst": 2, "poke": 0, "tank": 1}, "icon": "https://wiki.smite2.com/images/thumb/T_Ravana(S2)_Default_Icon.png/60px-T_Ravana(S2)_Default_Icon.png", "pantheon_es": "Hindú"}, {"id": "scylla", "name": "Scylla", "pantheon": "Greek", "attack": "ranged", "dmg": "M", "role": "mid", "tags": {"cc": 1, "mobility": 1, "sustain": 0, "burst": 2, "poke": 2, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Scylla_Default_Icon.png/60px-T_Scylla_Default_Icon.png", "pantheon_es": "Griego"}, {"id": "sobek", "name": "Sobek", "pantheon": "Egyptian", "attack": "melee", "dmg": "M", "role": "support", "tags": {"cc": 2, "mobility": 1, "sustain": 2, "burst": 0, "poke": 0, "tank": 3}, "icon": "https://wiki.smite2.com/images/thumb/T_Sobek(S2)_Default_Icon.png/60px-T_Sobek(S2)_Default_Icon.png", "pantheon_es": "Egipcio"}, {"id": "sol", "name": "Sol", "pantheon": "Norse", "attack": "ranged", "dmg": "M", "role": "mid", "tags": {"cc": 1, "mobility": 1, "sustain": 0, "burst": 2, "poke": 3, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Sol(S2)_Default_Icon.png/60px-T_Sol(S2)_Default_Icon.png", "pantheon_es": "Nórdico"}, {"id": "sun-wukong", "name": "Sun Wukong", "pantheon": "Chinese", "attack": "melee", "dmg": "F", "role": "solo", "tags": {"cc": 1, "mobility": 2, "sustain": 2, "burst": 1, "poke": 1, "tank": 2}, "icon": "https://wiki.smite2.com/images/thumb/T_Sun_Wukong(S2)_Default_Icon.png/60px-T_Sun_Wukong(S2)_Default_Icon.png", "pantheon_es": "Chino"}, {"id": "susano", "name": "Susano", "pantheon": "Japanese", "attack": "melee", "dmg": "F", "role": "jungla", "tags": {"cc": 1, "mobility": 3, "sustain": 1, "burst": 2, "poke": 0, "tank": 1}, "icon": "https://wiki.smite2.com/images/thumb/T_Susano(S2)_Default_Icon.png/60px-T_Susano(S2)_Default_Icon.png", "pantheon_es": "Japonés"}, {"id": "sylvanus", "name": "Sylvanus", "pantheon": "Roman", "attack": "ranged", "dmg": "M", "role": "support", "tags": {"cc": 2, "mobility": 1, "sustain": 3, "burst": 0, "poke": 0, "tank": 3}, "icon": "https://wiki.smite2.com/images/thumb/T_Sylvanus(S2)_Default_Icon.png/60px-T_Sylvanus(S2)_Default_Icon.png", "pantheon_es": "Romano"}, {"id": "thanatos", "name": "Thanatos", "pantheon": "Greek", "attack": "melee", "dmg": "F", "role": "jungla", "tags": {"cc": 1, "mobility": 2, "sustain": 1, "burst": 2, "poke": 0, "tank": 1}, "icon": "https://wiki.smite2.com/images/thumb/T_Thanatos(S2)_Default_Icon.png/60px-T_Thanatos(S2)_Default_Icon.png", "pantheon_es": "Griego"}, {"id": "the-morrigan", "name": "The Morrigan", "pantheon": "Celtic", "attack": "ranged", "dmg": "M", "role": "mid", "tags": {"cc": 1, "mobility": 1, "sustain": 0, "burst": 2, "poke": 3, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_The_Morrigan(S2)_Default_Icon.png/60px-T_The_Morrigan(S2)_Default_Icon.png", "pantheon_es": "Celta"}, {"id": "thor", "name": "Thor", "pantheon": "Norse", "attack": "melee", "dmg": "F", "role": "jungla", "tags": {"cc": 2, "mobility": 3, "sustain": 1, "burst": 2, "poke": 0, "tank": 1}, "icon": "https://wiki.smite2.com/images/thumb/T_Thor(S2)_Default_Icon.png/60px-T_Thor(S2)_Default_Icon.png", "pantheon_es": "Nórdico"}, {"id": "tsukuyomi", "name": "Tsukuyomi", "pantheon": "Japanese", "attack": "melee", "dmg": "F", "role": "jungla", "tags": {"cc": 1, "mobility": 1, "sustain": 1, "burst": 3, "poke": 0, "tank": 1}, "icon": "https://wiki.smite2.com/images/thumb/T_Tsukuyomi(S2)_Default_Icon.png/60px-T_Tsukuyomi(S2)_Default_Icon.png", "pantheon_es": "Japonés"}, {"id": "ullr", "name": "Ullr", "pantheon": "Norse", "attack": "ranged", "dmg": "F", "role": "carry", "tags": {"cc": 0, "mobility": 2, "sustain": 1, "burst": 2, "poke": 1, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Ullr(S2)_Default_Icon.png/60px-T_Ullr(S2)_Default_Icon.png", "pantheon_es": "Nórdico"}, {"id": "vulcan", "name": "Vulcan", "pantheon": "Roman", "attack": "ranged", "dmg": "M", "role": "mid", "tags": {"cc": 1, "mobility": 1, "sustain": 0, "burst": 2, "poke": 2, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Vulcan(S2)_Default_Icon.png/60px-T_Vulcan(S2)_Default_Icon.png", "pantheon_es": "Romano"}, {"id": "xbalanque", "name": "Xbalanque", "pantheon": "Maya", "attack": "ranged", "dmg": "F", "role": "carry", "tags": {"cc": 0, "mobility": 1, "sustain": 1, "burst": 2, "poke": 1, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Xbalanque(S2)_Default_Icon.png/60px-T_Xbalanque(S2)_Default_Icon.png", "pantheon_es": "Maya"}, {"id": "xing-tian", "name": "Xing Tian", "pantheon": "Chinese", "attack": "melee", "dmg": "M", "role": "support", "tags": {"cc": 3, "mobility": 1, "sustain": 2, "burst": 0, "poke": 0, "tank": 3}, "icon": "https://wiki.smite2.com/images/thumb/T_Xing_Tian(S2)_Default_Icon.png/60px-T_Xing_Tian(S2)_Default_Icon.png", "pantheon_es": "Chino"}, {"id": "yemoja", "name": "Yemoja", "pantheon": "Yoruba", "attack": "ranged", "dmg": "M", "role": "support", "tags": {"cc": 1, "mobility": 1, "sustain": 3, "burst": 0, "poke": 0, "tank": 1}, "icon": "https://wiki.smite2.com/images/thumb/T_Yemoja(S2)_Default_Icon.png/60px-T_Yemoja(S2)_Default_Icon.png", "pantheon_es": "Yoruba"}, {"id": "ymir", "name": "Ymir", "pantheon": "Norse", "attack": "melee", "dmg": "M", "role": "support", "tags": {"cc": 3, "mobility": 0, "sustain": 1, "burst": 0, "poke": 0, "tank": 3}, "icon": "https://wiki.smite2.com/images/thumb/T_Ymir(S2)_Default_Icon.png/60px-T_Ymir(S2)_Default_Icon.png", "pantheon_es": "Nórdico"}, {"id": "zeus", "name": "Zeus", "pantheon": "Greek", "attack": "ranged", "dmg": "M", "role": "mid", "tags": {"cc": 1, "mobility": 1, "sustain": 0, "burst": 3, "poke": 2, "tank": 0}, "icon": "https://wiki.smite2.com/images/thumb/T_Zeus(S2)_Default_Icon.png/60px-T_Zeus(S2)_Default_Icon.png", "pantheon_es": "Griego"}];
+const ITEMS = [{"name": "Bumba's Dagger", "es": "Daga de Bumba", "type": "starter", "power": "F", "desc": "Inicial físico pensado para roles de daño sostenido; tus básicos curan un poco de vida y te dan oro extra al golpear enemigos.", "tags": ["sustain", "gold-income"], "desc_en": "Sustain starter for damage-focused roles; your basic attacks heal a bit and grant bonus gold on takedowns.", "icon": "https://wiki.smite2.com/images/thumb/Starter_T1_Bumba%27s_Golden_Dagger.png/44px-Starter_T1_Bumba%27s_Golden_Dagger.png", "real_name": "Bumba's Golden Dagger"}, {"name": "Warrior's Axe", "es": "Hacha del Guerrero", "type": "starter", "power": "F", "desc": "Inicial clásico de solo/jungla: pega fuerte a los camps de jungla y da oro extra al último golpe en minions y monstruos.", "tags": ["jungle-clear", "gold-income", "tank"], "desc_en": "Classic solo/jungle starter: hits jungle camps hard and grants extra gold on minion/monster last hits.", "icon": "https://wiki.smite2.com/images/thumb/Starter_T1_Warrior%27s_Axe.png/44px-Starter_T1_Warrior%27s_Axe.png", "real_name": "Warrior's Axe"}, {"name": "Death's Toll", "es": "Peaje de la Muerte", "type": "starter", "power": "F", "desc": "Inicial de sustain físico para carrys y junglas: cada básico cura vida, ideal para plantarse en línea sin ir al recall.", "tags": ["sustain", "carry"], "desc_en": "Physical sustain starter for carries and junglers: every basic attack heals you, great for holding lane without recalling.", "icon": "https://wiki.smite2.com/images/thumb/Starter_T1_Death%27s_Toll.png/44px-Starter_T1_Death%27s_Toll.png", "real_name": "Death's Toll"}, {"name": "Vampiric Shroud", "es": "Sudario Vampírico", "type": "starter", "power": "F", "desc": "Inicial físico híbrido de tanque/daño: da vida, poder físico y cooldown reduction desde el minuto uno.", "tags": ["cdr", "tank", "sustain"], "desc_en": "Hybrid tank/damage physical starter: grants health, physical power and cooldown reduction from minute one.", "icon": "https://wiki.smite2.com/images/thumb/Starter_T1_Vampiric_Shroud.png/44px-Starter_T1_Vampiric_Shroud.png", "real_name": "Vampiric Shroud"}, {"name": "Leather Cowl", "es": "Capucha de Cuero", "type": "starter", "power": "F", "desc": "Inicial de asesino/jungla enfocado en penetración física temprana para romper objetivos rápido.", "tags": ["penetration", "jungle-clear", "burst"], "desc_en": "Assassin/jungle starter focused on early physical penetration to break objectives fast.", "icon": "https://wiki.smite2.com/images/thumb/Starter_T1_Leather_Cowl.png/44px-Starter_T1_Leather_Cowl.png", "real_name": "Leather Cowl"}, {"name": "Sands of Time", "es": "Arenas del Tiempo", "type": "starter", "power": "M", "desc": "Inicial mágico para mid: acelera tu progresión de nivel, perfecto para mages que buscan escalar rápido.", "tags": ["scaling", "mid"], "desc_en": "Magical mid starter: speeds up your level progression, perfect for mages looking to scale quickly.", "icon": "https://wiki.smite2.com/images/thumb/Starter_T1_Sands_of_Time.png/44px-Starter_T1_Sands_of_Time.png", "real_name": "Sands of Time"}, {"name": "Mage's Blessing", "es": "Bendición del Mago", "type": "starter", "power": "M", "desc": "Inicial mágico de sustain: tus habilidades curan un poco de vida y maná, útil contra matchups de mid muy agresivos.", "tags": ["sustain", "mid"], "desc_en": "Magical sustain starter: your abilities heal a bit of health and mana, useful against aggressive mid matchups.", "icon": "https://wiki.smite2.com/images/thumb/Starter_T1_Mage%27s_Blessing.png/44px-Starter_T1_Mage%27s_Blessing.png", "real_name": "Mage's Blessing"}, {"name": "Sentinel's Boon", "es": "Bendición del Centinela", "type": "starter", "power": "M", "desc": "Inicial mágico de support: aporta protecciones y un aura de curación leve para el equipo desde temprano.", "tags": ["support", "aura", "sustain", "tank"], "desc_en": "Magical support starter: grants protections and a light healing aura for the team from early on.", "icon": "https://wiki.smite2.com/images/thumb/Starter_T1_Sentinel%27s_Boon.png/44px-Starter_T1_Sentinel%27s_Boon.png", "real_name": "Sentinel's Boon"}, {"name": "Gilded Arrow", "es": "Flecha Dorada", "type": "starter", "power": "M", "desc": "Inicial mágico enfocado en farmeo eficiente de línea, bueno para mages centrados en escalar con oro.", "tags": ["scaling", "mid", "gold-income"], "desc_en": "Magical starter focused on efficient laning, good for mages centered on scaling with gold.", "icon": "https://wiki.smite2.com/images/thumb/Starter_T1_Gilded_Arrow.png/44px-Starter_T1_Gilded_Arrow.png", "real_name": "Gilded Arrow"}, {"name": "Bluestone Pendant", "es": "Colgante de Piedra Azul", "type": "starter", "power": "M", "desc": "Inicial mágico de poke temprano: tus básicos aplican un efecto que hace daño extra en área.", "tags": ["poke", "mid"], "desc_en": "Magical early poke starter: your basics apply an effect that deals extra area damage.", "icon": "https://wiki.smite2.com/images/thumb/Starter_T1_Bluestone_Pendant.png/44px-Starter_T1_Bluestone_Pendant.png", "real_name": "Bluestone Pendant"}, {"name": "Qin's Sais", "es": "Sables de Qin", "type": "offense", "power": "F", "desc": "Daño extra basado en la vida máxima del enemigo en cada básico; letal contra tanques y solos gordos.", "tags": ["anti-tank", "carry", "penetration-effect"], "desc_en": "Extra damage based on the enemy's max health on every basic; lethal against tanks and beefy solos.", "icon": "https://wiki.smite2.com/images/thumb/T3_Qin%27s_Blade.png/44px-T3_Qin%27s_Blade.png", "real_name": "Qin's Blade"}, {"name": "Titan's Bane", "es": "Perdición del Titán", "type": "offense", "power": "F", "desc": "Gran cantidad de penetración física plana; se vuelve esencial cuando el enemigo empieza a comprar protecciones.", "tags": ["penetration", "carry", "solo"], "desc_en": "Large flat physical penetration; becomes essential once the enemy starts buying protections.", "icon": "https://wiki.smite2.com/images/thumb/T3_Titan%27s_Bane.png/44px-T3_Titan%27s_Bane.png", "real_name": "Titan's Bane"}, {"name": "Brawler's Beat Stick", "es": "Garrote del Peleador", "type": "offense", "power": "F", "desc": "Poder físico con antihealing incluido: reduce la curación que reciben los enemigos que golpeás.", "tags": ["antiheal", "penetration"], "desc_en": "Physical power with built-in antiheal: reduces healing received by enemies you hit.", "icon": "https://wiki.smite2.com/images/thumb/T3_Brawler%27s_Beat_Stick.png/44px-T3_Brawler%27s_Beat_Stick.png", "real_name": "Brawler's Beat Stick"}, {"name": "Deathbringer", "es": "Portador de Muerte", "type": "offense", "power": "F", "desc": "El multiplicador de crítico más alto del juego; tu daño crítico se vuelve devastador en manos de un carry bien posicionado.", "tags": ["crit", "carry"], "desc_en": "The highest critical damage multiplier in the game; your crits become devastating in a well-positioned carry's hands.", "icon": "https://wiki.smite2.com/images/thumb/T3_Deathbringer.png/44px-T3_Deathbringer.png", "real_name": "Deathbringer"}, {"name": "Rage", "es": "Furia", "type": "offense", "power": "F", "desc": "Probabilidad de crítico base más poder físico; el punto de partida de cualquier build crítico.", "tags": ["crit", "carry"], "desc_en": "Base critical chance plus physical power; the starting point of any crit build.", "icon": "https://wiki.smite2.com/images/thumb/T3_Rage.png/44px-T3_Rage.png", "real_name": "Rage"}, {"name": "Wind Demon", "es": "Demonio del Viento", "type": "offense", "power": "F", "desc": "Crítico con velocidad de movimiento extra al golpear; te ayuda a kitear mientras hacés daño.", "tags": ["crit", "mobility", "carry"], "desc_en": "Crit item with extra move speed on hit; helps you kite while dealing damage.", "icon": "https://wiki.smite2.com/images/thumb/T3_Devourer%27s_Gauntlet.png/44px-T3_Devourer%27s_Gauntlet.png", "real_name": "Devourer's Gauntlet"}, {"name": "Executioner", "es": "Verdugo", "type": "offense", "power": "F", "desc": "Cada básico reduce las protecciones físicas del enemigo, apilable; ideal para pelear contra tanques.", "tags": ["anti-tank", "penetration-effect", "carry"], "desc_en": "Every basic attack reduces the enemy's physical protections, stacking; ideal for fighting tanks.", "icon": "https://wiki.smite2.com/images/thumb/T3_The_Executioner.png/44px-T3_The_Executioner.png", "real_name": "The Executioner"}, {"name": "The Crusher", "es": "El Aplastador", "type": "offense", "power": "F", "desc": "Poder físico y velocidad de ataque a precio accesible, con una pasiva de daño en área al golpear.", "tags": ["burst", "early-power"], "desc_en": "Cheap physical power and attack speed with an on-hit area damage passive.", "icon": "https://wiki.smite2.com/images/thumb/T3_The_Crusher.png/44px-T3_The_Crusher.png", "real_name": "The Crusher"}, {"name": "Jotunn's Wrath", "es": "Ira de Jotunn", "type": "offense", "power": "F", "desc": "Poder físico con cooldown reduction; núcleo clásico para dioses físicos basados en habilidades.", "tags": ["cdr", "ability-based"], "desc_en": "Physical power with cooldown reduction; a classic core for ability-based physical gods.", "icon": "https://wiki.smite2.com/images/thumb/T3_Jotunn%27s_Wrath.png/44px-T3_Jotunn%27s_Wrath.png", "real_name": "Jotunn's Wrath"}, {"name": "Hydra's Lament", "es": "Lamento de la Hidra", "type": "offense", "power": "F", "desc": "Cooldown reduction, vida y poder físico en un solo ítem; buen núcleo defensivo-ofensivo para solos.", "tags": ["cdr", "tank", "solo"], "desc_en": "Cooldown reduction, health and physical power in one item; a solid offense-defense core for solos.", "icon": "https://wiki.smite2.com/images/thumb/T3_Hydra%27s_Lament.png/44px-T3_Hydra%27s_Lament.png", "real_name": "Hydra's Lament"}, {"name": "Heartseeker", "es": "Buscacorazones", "type": "offense", "power": "F", "desc": "Daño físico como porcentaje de la vida actual del enemigo; muy fuerte contra objetivos de vida alta.", "tags": ["anti-tank", "dot"], "desc_en": "Physical damage as a percentage of the enemy's current health; very strong against high-health targets.", "icon": "https://wiki.smite2.com/images/thumb/T3_Heartseeker.png/44px-T3_Heartseeker.png", "real_name": "Heartseeker"}, {"name": "Asi", "es": "Asi", "type": "offense", "power": "F", "desc": "Lifesteal físico con un escudo cuando tu vida baja; sustain confiable para peleas prolongadas.", "tags": ["lifesteal", "sustain", "tank"], "desc_en": "Physical lifesteal with a shield when your health drops; reliable sustain for extended fights.", "icon": "https://wiki.smite2.com/images/thumb/T3_Asi.png/44px-T3_Asi.png", "real_name": "Asi"}, {"name": "Bloodforge", "es": "Forja de Sangre", "type": "offense", "power": "F", "desc": "Lifesteal físico con un escudo que se recarga al conseguir asesinatos; premia el snowball agresivo.", "tags": ["lifesteal", "sustain", "snowball"], "desc_en": "Physical lifesteal with a shield that recharges on takedowns; rewards aggressive snowballing.", "icon": "https://wiki.smite2.com/images/thumb/T3_Bloodforge.png/44px-T3_Bloodforge.png", "real_name": "Bloodforge"}, {"name": "Void Shield", "es": "Escudo del Vacío", "type": "offense", "power": "F", "desc": "Penetración física con protecciones mágicas; útil como física-defensiva cuando el enemigo tiene amenaza mágica también.", "tags": ["penetration", "protections-magical"], "desc_en": "Physical penetration with magical protections; useful as physical-defensive when the enemy also has magical threats.", "icon": "https://wiki.smite2.com/images/thumb/T3_Void_Shield.png/44px-T3_Void_Shield.png", "real_name": "Void Shield"}, {"name": "Serrated Edge", "es": "Filo Serrado", "type": "offense", "power": "F", "desc": "Penetración física a porcentaje, muy fuerte tardío contra equipos que se estackean de protecciones.", "tags": ["penetration", "late-game"], "desc_en": "Percentage physical penetration, very strong late game against teams stacking protections.", "icon": "https://wiki.smite2.com/images/thumb/T3_Serrated_Edge.png/44px-T3_Serrated_Edge.png", "real_name": "Serrated Edge"}, {"name": "Rod of Tahuti", "es": "Vara de Tahuti", "type": "offense", "power": "M", "desc": "El multiplicador de poder mágico más grande del juego; el ítem final de casi todo mage full daño.", "tags": ["scaling", "mid", "late-game"], "desc_en": "The biggest magical power multiplier in the game; the final item for almost every full-damage mage.", "icon": "https://wiki.smite2.com/images/thumb/T3_Rod_of_Tahuti.png/44px-T3_Rod_of_Tahuti.png", "real_name": "Rod of Tahuti"}, {"name": "Soul Reaver", "es": "Segador de Almas", "type": "offense", "power": "M", "desc": "Poder mágico con penetración que escala con tu maná gastado; excelente contra tanques mágicos.", "tags": ["penetration", "anti-tank", "mid"], "desc_en": "Magical power with penetration that scales with mana spent; excellent against magical tanks.", "icon": "https://wiki.smite2.com/images/thumb/T3_Soul_Reaver.png/44px-T3_Soul_Reaver.png", "real_name": "Soul Reaver"}, {"name": "Obsidian Shard", "es": "Fragmento de Obsidiana", "type": "offense", "power": "M", "desc": "Penetración mágica plana; se vuelve prioritario apenas el enemigo compra protecciones mágicas.", "tags": ["penetration", "mid"], "desc_en": "Flat magical penetration; becomes a priority as soon as the enemy buys magical protections.", "icon": "https://wiki.smite2.com/images/thumb/T3_Obsidian_Shard.png/44px-T3_Obsidian_Shard.png", "real_name": "Obsidian Shard"}, {"name": "Divine Ruin", "es": "Ruina Divina", "type": "offense", "power": "M", "desc": "Poder mágico con antihealing: corta la curación enemiga apenas conecta una habilidad.", "tags": ["antiheal", "penetration"], "desc_en": "Magical power with antiheal: cuts enemy healing as soon as an ability lands.", "icon": "https://wiki.smite2.com/images/thumb/T3_Divine_Ruin.png/44px-T3_Divine_Ruin.png", "real_name": "Divine Ruin"}, {"name": "Chronos' Pendant", "es": "Colgante de Cronos", "type": "offense", "power": "M", "desc": "Cooldown reduction y poder mágico; permite tirar habilidades con muchísima más frecuencia.", "tags": ["cdr", "ability-based"], "desc_en": "Cooldown reduction and magical power; lets you throw out abilities far more often.", "icon": "https://wiki.smite2.com/images/thumb/T3_Chronos%27_Pendant.png/44px-T3_Chronos%27_Pendant.png", "real_name": "Chronos' Pendant"}, {"name": "Spear of Desolation", "es": "Lanza de la Desolación", "type": "offense", "power": "M", "desc": "Poder mágico con penetración que se potencia tras usar tu definitiva; recompensa jugar alrededor del ultimate.", "tags": ["penetration", "burst"], "desc_en": "Magical power with penetration that boosts after using your ultimate; rewards playing around your ult.", "icon": "https://wiki.smite2.com/images/thumb/T3_Spear_of_Desolation.png/44px-T3_Spear_of_Desolation.png", "real_name": "Spear of Desolation"}, {"name": "Bancroft's Talon", "es": "Garra de Bancroft", "type": "offense", "power": "M", "desc": "Poder mágico con lifesteal en habilidades cuando el enemigo está con poca vida; sustain de cierre de pelea.", "tags": ["lifesteal", "sustain", "burst"], "desc_en": "Magical power with ability lifesteal when the enemy is low on health; sustain for closing out fights.", "icon": "https://wiki.smite2.com/images/thumb/T3_Bancroft%27s_Talon.png/44px-T3_Bancroft%27s_Talon.png", "real_name": "Bancroft's Talon"}, {"name": "Polynomicon", "es": "Polinomicón", "type": "offense", "power": "M", "desc": "Tu siguiente básico tras usar una habilidad hace daño mágico extra; combo perfecto para mages con buen kit de básicos.", "tags": ["burst", "ability-based"], "desc_en": "Your next basic attack after casting an ability deals bonus magical damage; a perfect combo for mages with a good on-hit kit.", "icon": "https://wiki.smite2.com/images/thumb/T3_Polynomicon.png/44px-T3_Polynomicon.png", "real_name": "Polynomicon"}, {"name": "Void Stone", "es": "Piedra del Vacío", "type": "offense", "power": "M", "desc": "Penetración mágica con protecciones físicas; versión mágica-defensiva para cuando necesitás tanquear físicos.", "tags": ["penetration", "protections-physical"], "desc_en": "Magical penetration with physical protections; the defensive-magical version for when you need to tank physicals.", "icon": "https://wiki.smite2.com/images/thumb/T3_Void_Stone.png/44px-T3_Void_Stone.png", "real_name": "Void Stone"}, {"name": "Typhon's Fang", "es": "Colmillo de Tifón", "type": "offense", "power": "M", "desc": "Cooldown reduction agresivo con poder mágico, pensado para kits de habilidades muy espameables.", "tags": ["cdr", "ability-based"], "desc_en": "Aggressive cooldown reduction with magical power, built for very spammable ability kits.", "icon": "https://wiki.smite2.com/images/thumb/T3_Typhon%27s_Fang.png/44px-T3_Typhon%27s_Fang.png", "real_name": "Typhon's Fang"}, {"name": "Book of Thoth", "es": "Libro de Thot", "type": "offense", "power": "M", "desc": "Poder mágico que escala con tu maná máximo; ideal para mages con pool de maná grande.", "tags": ["scaling", "sustain-mana"], "desc_en": "Magical power that scales with your max mana; ideal for mages with a large mana pool.", "icon": "https://wiki.smite2.com/images/thumb/T3_Book_of_Thoth.png/44px-T3_Book_of_Thoth.png", "real_name": "Book of Thoth"}, {"name": "Doom Orb", "es": "Orbe de la Perdición", "type": "offense", "power": "M", "desc": "Poder mágico con daño extra al golpear con básicos; buen núcleo temprano de burst.", "tags": ["burst", "early-power"], "desc_en": "Magical power with bonus damage on basic attack hits; a solid early burst core.", "icon": "https://wiki.smite2.com/images/thumb/T3_Doom_Orb.png/44px-T3_Doom_Orb.png", "real_name": "Doom Orb"}, {"name": "Sovereignty", "es": "Soberanía", "type": "defense", "power": "N", "protection": "F", "desc": "Aura de protecciones físicas y vida para todo el equipo cercano; núcleo obligatorio de cualquier support de peleas.", "tags": ["aura", "physical-def", "tank", "support"], "desc_en": "Aura of physical protections and health for the whole nearby team; a must-have core for any teamfight support.", "icon": "https://wiki.smite2.com/images/thumb/T3_Breastplate_of_Valor.png/44px-T3_Breastplate_of_Valor.png", "real_name": "Breastplate of Valor"}, {"name": "Heartward Amulet", "es": "Amuleto Protector", "type": "defense", "power": "N", "protection": "M", "desc": "Aura de protecciones mágicas y curación en área; el complemento mágico de Soberanía para el equipo.", "tags": ["aura", "magical-def", "sustain", "support"], "desc_en": "Aura of magical protections and area healing; the magical counterpart to Sovereignty for the team.", "icon": "https://wiki.smite2.com/images/thumb/T3_Chandra%27s_Grace.png/44px-T3_Chandra%27s_Grace.png", "real_name": "Chandra's Grace"}, {"name": "Breastplate of Valor", "es": "Peto del Valor", "type": "defense", "power": "N", "protection": "F", "desc": "Protecciones físicas con cooldown reduction; buen núcleo defensivo para solos que dependen de sus habilidades.", "tags": ["physical-def", "cdr", "solo"], "desc_en": "Physical protections with cooldown reduction; a solid defensive core for solos who lean on their abilities.", "icon": "https://wiki.smite2.com/images/thumb/T3_Breastplate_of_Valor.png/44px-T3_Breastplate_of_Valor.png", "real_name": "Breastplate of Valor"}, {"name": "Sigil of the Old Guard", "es": "Sello de la Vieja Guardia", "type": "defense", "power": "N", "protection": "M", "desc": "Protecciones mágicas con cooldown reduction; equivalente mágico del Peto del Valor.", "tags": ["magical-def", "cdr", "solo"], "desc_en": "Magical protections with cooldown reduction; the magical equivalent of Breastplate of Valor.", "icon": "https://wiki.smite2.com/images/thumb/T3_Sigil_of_the_Old_Guard.png/44px-T3_Sigil_of_the_Old_Guard.png", "real_name": "Sigil of the Old Guard"}, {"name": "Midgardian Mail", "es": "Cota Midgardiana", "type": "defense", "power": "N", "protection": "F", "desc": "Protecciones físicas con velocidad de ataque reflejada; castiga a los carrys físicos que te atacan de cerca.", "tags": ["physical-def", "anti-carry"], "desc_en": "Physical protections with reflected attack speed; punishes physical carries who melee you.", "icon": "https://wiki.smite2.com/images/thumb/T3_Midgardian_Mail.png/44px-T3_Midgardian_Mail.png", "real_name": "Midgardian Mail"}, {"name": "Spectral Armor", "es": "Armadura Espectral", "type": "defense", "power": "N", "protection": "F", "desc": "Protecciones físicas que reducen el daño crítico recibido; imprescindible contra carrys críticos.", "tags": ["physical-def", "anti-crit"], "desc_en": "Physical protections that reduce incoming critical damage; a must against critical-strike carries.", "icon": "https://wiki.smite2.com/images/thumb/T3_Spectral_Armor.png/44px-T3_Spectral_Armor.png", "real_name": "Spectral Armor"}, {"name": "Mystical Mail", "es": "Cota Mística", "type": "defense", "power": "N", "protection": "F", "desc": "Protecciones físicas con un aura que hace daño periódico a los enemigos cercanos; excelente contra equipos de melee.", "tags": ["physical-def", "aura", "anti-melee"], "desc_en": "Physical protections with an aura that deals periodic damage to nearby enemies; excellent against melee-heavy teams.", "icon": "https://wiki.smite2.com/images/thumb/T3_Mystical_Mail.png/44px-T3_Mystical_Mail.png", "real_name": "Mystical Mail"}, {"name": "Hide of the Nemean Lion", "es": "Piel del León de Nemea", "type": "defense", "power": "N", "protection": "F", "desc": "Protecciones físicas con lifesteal físico incluido; sustain de tanque puro.", "tags": ["physical-def", "lifesteal", "tank"], "desc_en": "Physical protections with built-in physical lifesteal; pure tank sustain.", "icon": "https://wiki.smite2.com/images/thumb/T3_Hide_of_the_Nemean_Lion.png/44px-T3_Hide_of_the_Nemean_Lion.png", "real_name": "Hide of the Nemean Lion"}, {"name": "Genji's Guard", "es": "Guardia de Genji", "type": "defense", "power": "N", "protection": "M", "desc": "Protecciones mágicas con reducción de efectos de control (tenacity); la respuesta directa a equipos con mucho CC.", "tags": ["magical-def", "cc-reduction"], "desc_en": "Magical protections with crowd-control reduction (tenacity); the direct answer to heavy-CC teams.", "icon": "https://wiki.smite2.com/images/thumb/T3_Genji%27s_Guard.png/44px-T3_Genji%27s_Guard.png", "real_name": "Genji's Guard"}, {"name": "Spirit Robe", "es": "Túnica Espiritual", "type": "defense", "power": "N", "protection": "M", "desc": "Protecciones mágicas con reducción de CC y un escudo al usar habilidad de movilidad; ideal contra combos de control.", "tags": ["magical-def", "cc-reduction", "mobility"], "desc_en": "Magical protections with CC reduction and a shield on using a mobility ability; ideal against control-heavy combos.", "icon": "https://wiki.smite2.com/images/thumb/T3_Spirit_Robe.png/44px-T3_Spirit_Robe.png", "real_name": "Spirit Robe"}, {"name": "Pestilence", "es": "Pestilencia", "type": "defense", "power": "N", "protection": "M", "desc": "Protecciones mágicas con antihealing en área; corta la curación enemiga mientras te tanquea.", "tags": ["magical-def", "antiheal"], "desc_en": "Magical protections with area antiheal; cuts enemy healing while you tank.", "icon": "https://wiki.smite2.com/images/thumb/T3_Pestilence.png/44px-T3_Pestilence.png", "real_name": "Pestilence"}, {"name": "Oni Hunter's Garb", "es": "Vestimenta del Cazador de Oni", "type": "defense", "power": "N", "protection": "F", "desc": "Protecciones físicas con antihealing en área; versión física de Pestilencia.", "tags": ["physical-def", "antiheal"], "desc_en": "Physical protections with area antiheal; the physical version of Pestilence.", "icon": "https://wiki.smite2.com/images/thumb/T3_Oni_Hunter%27s_Garb.png/44px-T3_Oni_Hunter%27s_Garb.png", "real_name": "Oni Hunter's Garb"}, {"name": "Gladiator's Shield", "es": "Escudo del Gladiador", "type": "defense", "power": "N", "protection": "F", "desc": "Protecciones físicas con velocidad de movimiento extra; te ayuda a llegar a pelear o escapar.", "tags": ["physical-def", "mobility"], "desc_en": "Physical protections with bonus move speed; helps you get into fights or escape them.", "icon": "https://wiki.smite2.com/images/thumb/T3_Gladiator%27s_Shield.png/44px-T3_Gladiator%27s_Shield.png", "real_name": "Gladiator's Shield"}, {"name": "Ethereal Staff", "es": "Bastón Etéreo", "type": "defense", "power": "N", "protection": "M", "desc": "Protecciones mágicas que también aportan algo de poder mágico; útil para solos/junglas mágicos híbridos.", "tags": ["magical-def", "hybrid-power"], "desc_en": "Magical protections that also grant some magical power; useful for hybrid magical solos/junglers.", "icon": "https://wiki.smite2.com/images/thumb/T3_Ethereal_Staff.png/44px-T3_Ethereal_Staff.png", "real_name": "Ethereal Staff"}, {"name": "Emperor's Armor", "es": "Armadura del Emperador", "type": "defense", "power": "N", "protection": "F", "desc": "Protecciones físicas con curación al golpear básicos; buen sustain de tanque en línea.", "tags": ["physical-def", "sustain"], "desc_en": "Physical protections with healing on basic attack hits; solid tank sustain in lane.", "icon": "https://wiki.smite2.com/images/thumb/T3_Dwarven_Plate.png/44px-T3_Dwarven_Plate.png", "real_name": "Dwarven Plate"}, {"name": "Bulwark of Hope", "es": "Baluarte de la Esperanza", "type": "defense", "power": "N", "protection": "M", "desc": "Protecciones mágicas con un escudo que se activa al llegar a poca vida; salva vidas contra combos de burst mágico.", "tags": ["magical-def", "anti-burst"], "desc_en": "Magical protections with a shield that triggers at low health; a lifesaver against magical burst combos.", "icon": "https://wiki.smite2.com/images/thumb/T3_Radiant_Bulwark.png/44px-T3_Radiant_Bulwark.png", "real_name": "Radiant Bulwark"}, {"name": "Warlock's Staff", "es": "Bastón del Brujo", "type": "hybrid", "power": "M", "desc": "Poder mágico con cooldown reduction y protecciones leves; buen núcleo de supervivencia para mages agresivos.", "tags": ["cdr", "sustain-ish"], "desc_en": "Magical power with cooldown reduction and light protections; a solid survivability core for aggressive mages.", "icon": "https://wiki.smite2.com/images/thumb/T3_Warlock%27s_Staff.png/44px-T3_Warlock%27s_Staff.png", "real_name": "Warlock's Staff"}, {"name": "Trickster's Shroud", "es": "Manto del Embaucador", "type": "hybrid", "power": "F", "desc": "Poder físico con velocidad de movimiento y penetración leve; excelente para asesinos que buscan picos de movilidad.", "tags": ["mobility", "penetration", "jungla"], "desc_en": "Physical power with move speed and light penetration; excellent for assassins looking for mobility spikes.", "icon": "https://wiki.smite2.com/images/thumb/T3_Golden_Blade.png/44px-T3_Golden_Blade.png", "real_name": "Golden Blade"}, {"name": "Toxic Blade", "es": "Filo Tóxico", "type": "hybrid", "power": "F", "desc": "Velocidad de ataque con antihealing; ítem de bajo costo que corta la curación enemiga desde temprano.", "tags": ["antiheal", "attackspeed"], "desc_en": "Attack speed with antiheal; a cheap item that cuts enemy healing from early on.", "icon": "https://wiki.smite2.com/images/thumb/T3_Toxic_Blade.png/44px-T3_Toxic_Blade.png", "real_name": "Toxic Blade"}, {"name": "Talisman of Energy", "es": "Talismán de Energía", "type": "hybrid", "power": "N", "desc": "Regeneración de maná y algo de protecciones; alivia problemas de maná en supports y mages con sed de mana.", "tags": ["mana-sustain", "support"], "desc_en": "Mana regeneration and some protections; eases mana problems for thirsty supports and mages.", "icon": "https://wiki.smite2.com/images/thumb/T3_Rod_of_Asclepius.png/44px-T3_Rod_of_Asclepius.png", "real_name": "Rod of Asclepius"}, {"name": "Purification Beads", "es": "Cuentas de Purificación", "type": "relic", "power": "N", "desc": "Elimina todos los efectos de control sobre vos y te da inmunidad breve a nuevo CC; la reliquia más importante contra equipos con mucho control.", "tags": ["cc-removal", "essential-vs-cc"], "desc_en": "Clears all crowd-control effects on you and grants brief immunity to new CC; the single most important relic against heavy-control teams.", "icon": "https://wiki.smite2.com/images/thumb/Relic_Purification_Beads.png/44px-Relic_Purification_Beads.png", "real_name": "Purification Beads"}, {"name": "Aegis Amulet", "es": "Amuleto de Égida", "type": "relic", "power": "N", "desc": "Te vuelve inmune al daño por un instante; salva de combos de burst y ejecuciones.", "tags": ["anti-burst", "damage-immunity"], "desc_en": "Makes you immune to damage for an instant; saves you from burst combos and executes.", "icon": "https://wiki.smite2.com/images/thumb/Relic_Aegis_Amulet.png/44px-Relic_Aegis_Amulet.png", "real_name": "Aegis Amulet"}, {"name": "Blink Rune", "es": "Runa de Parpadeo", "type": "relic", "power": "N", "desc": "Teletransporte corto instantáneo; para iniciar peleas, perseguir o escapar en el momento justo.", "tags": ["mobility", "engage", "escape"], "desc_en": "A short instant teleport; for initiating fights, chasing, or escaping at just the right moment.", "icon": "https://wiki.smite2.com/images/thumb/Relic_Blink_Rune.png/44px-Relic_Blink_Rune.png", "real_name": "Blink Rune"}, {"name": "Meditation Cloak", "es": "Manto de Meditación", "type": "relic", "power": "N", "desc": "Restaura vida y maná en el acto; ideal para sostenerse en línea sin recallear.", "tags": ["sustain", "laning"], "desc_en": "Instantly restores health and mana; ideal for holding lane without recalling.", "icon": "https://wiki.smite2.com/images/thumb/Relic_Meditation.png/44px-Relic_Meditation.png", "real_name": "Meditation"}, {"name": "Sunder", "es": "Fractura", "type": "relic", "power": "N", "desc": "Reduce drásticamente las protecciones de los enemigos cercanos por un tiempo corto; potencia el burst del equipo.", "tags": ["penetration", "teamfight"], "desc_en": "Drastically lowers nearby enemies' protections for a short time; supercharges your team's burst.", "icon": "https://wiki.smite2.com/images/thumb/Relic_Sundering_Arc.png/44px-Relic_Sundering_Arc.png", "real_name": "Sundering Arc"}, {"name": "Heavenly Agility", "es": "Agilidad Celestial", "type": "relic", "power": "N", "desc": "Velocidad de ataque y movimiento explosiva por un corto período; ideal para carrys en peleas rápidas.", "tags": ["attackspeed", "mobility", "carry"], "desc_en": "Explosive attack speed and move speed for a short window; great for carries in fast fights.", "icon": "https://wiki.smite2.com/images/thumb/Relic_Agility_Relic.png/44px-Relic_Agility_Relic.png", "real_name": "Agility Relic"}, {"name": "Belt of Frenzy", "es": "Cinturón de Frenesí", "type": "relic", "power": "N", "desc": "Velocidad de movimiento y ataque al golpear a un dios enemigo; te mantiene pegado a tu objetivo.", "tags": ["mobility", "chase"], "desc_en": "Move and attack speed on hitting an enemy god; keeps you stuck to your target.", "icon": "https://wiki.smite2.com/images/thumb/Relic_Dagger_of_Frenzy.png/44px-Relic_Dagger_of_Frenzy.png", "real_name": "Dagger of Frenzy"}, {"name": "Horrific Emblem", "es": "Emblema Horrífico", "type": "relic", "power": "N", "desc": "Marca a un enemigo para que reciba más daño de todo tu equipo; excelente para focalizar a un tanque o un objetivo prioritario.", "tags": ["anti-tank", "teamfight", "focus"], "desc_en": "Marks an enemy to take extra damage from your whole team; excellent for focusing a tank or priority target.", "icon": "https://wiki.smite2.com/images/thumb/Relic_Aegis_of_Acceleration.png/44px-Relic_Aegis_of_Acceleration.png", "real_name": "Aegis of Acceleration"}, {"name": "Phantom Veil", "es": "Velo Fantasma", "type": "relic", "power": "N", "desc": "Vuelve indetectable brevemente y purga efectos negativos; útil contra equipos con muchos CC/vigilancia.", "tags": ["cc-removal", "stealth"], "desc_en": "Briefly turns you undetectable and purges negative effects; useful against heavy CC/vision teams.", "icon": "https://wiki.smite2.com/images/thumb/Relic_Phantom_Shell.png/44px-Relic_Phantom_Shell.png", "real_name": "Phantom Shell"}];
+const ROLE_ES = {"solo": "Solo", "jungla": "Jungla", "mid": "Mid", "support": "Soporte", "carry": "Carry"};
+const ROLE_EN = {"solo": "Solo", "jungla": "Jungle", "mid": "Mid", "support": "Support", "carry": "Carry"};
+/* =========================================================
+   Ascendant — Coach de Smite 2
+   Motor de la app: i18n, render, y lógica de counters/build
+   ========================================================= */
+
+let LANG = 'es';
+
+/* ---------------- i18n ---------------- */
+const I18N = {
+  es: {
+    brandName:"Ascendant", brandSub:"Coach de Smite 2 para nuevos jugadores",
+    tabHome:"Inicio", tabGods:"Dioses", tabItems:"Objetos", tabBuilder:"Constructor de equipo", tabModes:"Modos de juego",
+    heroTitle:"Tu coach personal para dominar Smite 2",
+    heroText:"Elegí tu dios, cargá el equipo aliado y el enemigo, y te decimos exactamente qué construir, por qué, y cómo ganar el matchup — pensado para jugadores que recién arrancan.",
+    heroCta:"Analizar mi partida →",
+    heroPanelTitle:"Cobertura de la app",
+    statGods:"Dioses cubiertos", statItems:"Objetos curados", statModes:"Modos de juego", statRoles:"Roles soportados", statRolesVal:"5",
+    howTitle:"Cómo funciona",
+    how1t:"1. Elegís tu dios y rol", how1d:"Seleccioná con quién vas a jugar y en qué posición (soporte, mid, jungla, solo o carry).",
+    how2t:"2. Cargás ambos equipos", how2d:"Metés a tus aliados y a los enemigos que ya sabés que vas a enfrentar (o los que vayan apareciendo en la selección).",
+    how3t:"3. Analizás la partida", how3d:"El motor lee la composición enemiga: cuánto daño físico/mágico tiene, cuánto control, movilidad y sustain.",
+    how4t:"4. Recibís tu build", how4d:"Te armamos un inicial, un núcleo de 5 items y las mejores reliquias, con el porqué de cada elección.",
+    homeNotice:"<b>Nota:</b> los datos de dioses e items de esta app están curados a mano usando la mecánica del juego (tipo de daño, control, movilidad, sustain) y la información pública de smite2.com y wiki.smite2.com. No reflejan winrates en vivo del parche actual — conviene revisar patch notes si algo cambió recientemente.",
+    godsTitle:"Roster de dioses", godsSub:"Tocá un dios para ver su perfil de counters y qué builds lo frenan.",
+    godSearchPh:"Buscar dios...",
+    allRoles:"Todos los roles", allDmg:"Todos los tipos de daño", physical:"Físico", magical:"Mágico",
+    itemsTitle:"Objetos", itemsSub:"Base de items curada: iniciales, ofensivos, defensivos, híbridos y reliquias.",
+    builderTitle:"Constructor de equipo", builderSub:"Cargá tu dios y rol, tu equipo, y el equipo enemigo. Después tocá analizar.",
+    allyTitle:"🛡 Tu equipo", enemyTitle:"⚔ Equipo enemigo",
+    analyzeBtn:"Analizar partida",
+    modesTitle:"Modos de juego", modesSub:"Un resumen rápido de cada modo para saber a qué te metés.",
+    footerText:"Ascendant no es un producto oficial de Hi-Rez Studios. Datos curados con fines educativos para nuevos jugadores de Smite 2.",
+    chooseGod:"Elegí tu dios", chooseRole:"Rol", ally:"Aliado", enemy:"Enemigo", none:"— vacío —",
+    itype_starter:"Inicial", itype_offense:"Ofensivo", itype_defense:"Defensivo", itype_hybrid:"Híbrido", itype_relic:"Reliquia",
+    resReadTitle:"Lectura del equipo enemigo", resThreatTitle:"Amenazas y advertencias",
+    dmgSplit:"Reparto de daño enemigo", ccLevel:"Control (CC) enemigo", mobLevel:"Movilidad enemiga", sustLevel:"Sustain / curación enemiga",
+    buildTitle:"Build recomendada para vos", relicTitle:"Reliquias recomendadas",
+    starterCol:"Inicial", coreCol:"Núcleo (5 items)", situCol:"Situacionales",
+    fillTeams:"Completá al menos tu dios para poder analizar.",
+    warnPhysical:"El enemigo pega mayormente físico — priorizá protecciones físicas.",
+    warnMagical:"El enemigo pega mayormente mágico — priorizá protecciones mágicas.",
+    warnMixed:"El daño enemigo está parejo entre físico y mágico — considerá un build más híbrido o balanceado.",
+    warnCC:"Composición enemiga con mucho control — las Cuentas de Purificación son casi obligatorias.",
+    warnMob:"El enemigo tiene mucha movilidad — vas a necesitar formas de anclarlo (slows/raíces) o un buen posicionamiento.",
+    warnSustain:"El enemigo tiene bastante curación/sustain — sumá antihealing a tu build.",
+    warnBurst:"Hay amenazas de burst alto en el enemigo — cuidado con quedar solo/a, y considerá Égida para combos.",
+    warnTank:"El enemigo tiene tanques con mucha vida — priorizá penetración y daño anti-tanque.",
+    goodBalanced:"La composición enemiga está relativamente balanceada — podés construir tu build estándar sin grandes desvíos.",
+    noEnemyData:"Agregá dioses enemigos para obtener un análisis real de la composición.",
+    reasonAntiheal:"Corta la curación/sustain que detectamos en el equipo enemigo.",
+    reasonPen:"El enemigo va a acumular protecciones — esta penetración te mantiene relevante.",
+    reasonCCred:"Reduce la duración del control enemigo, clave contra esta composición.",
+    reasonAntiTank:"Ideal contra los tanques/vida alta que identificamos en el rival.",
+    reasonAntiCrit:"Te protege de los carrys críticos detectados en el enemigo.",
+    reasonAura:"Da protecciones/curación a todo tu equipo en pelea — tu rol lo necesita.",
+    reasonRoleFit:"Encaja con tu rol (%role%) y tipo de daño (%dmg%).",
+    reasonDefaultDef:"Protecciones base para sobrevivir combates prolongados.",
+    reasonDefaultOff:"Núcleo de daño estándar para tu rol.",
+    reasonMobility:"Te da la movilidad extra que necesitás contra este enemigo tan móvil.",
+    relicBeads:"Con tanto control enemigo, es casi obligatoria.",
+    relicAegis:"Te salva de los combos de burst que detectamos.",
+    relicBlink:"Útil para iniciar peleas o escapar según tu rol.",
+    relicSunder:"Ayuda a tu equipo a romper la vida alta / protecciones del rival en peleas.",
+    relicDefault:"Buena opción general para tu rol en esta partida.",
+    close:"Cerrar", counterProfile:"Perfil de counters", strongAgainst:"Le gana bien a...", weakAgainst:"Sufre contra...",
+    tagCC:"Control", tagMobility:"Movilidad", tagSustain:"Sustain", tagBurst:"Burst", tagPoke:"Poke", tagTank:"Tankeo",
+  },
+  en: {
+    brandName:"Ascendant", brandSub:"Smite 2 coach for new players",
+    tabHome:"Home", tabGods:"Gods", tabItems:"Items", tabBuilder:"Team Builder", tabModes:"Game Modes",
+    heroTitle:"Your personal coach for mastering Smite 2",
+    heroText:"Pick your god, load up your team and the enemy team, and we'll tell you exactly what to build, why, and how to win the matchup — built for players who are just starting out.",
+    heroCta:"Analyze my match →",
+    heroPanelTitle:"App coverage",
+    statGods:"Gods covered", statItems:"Curated items", statModes:"Game modes", statRoles:"Roles supported", statRolesVal:"5",
+    howTitle:"How it works",
+    how1t:"1. Pick your god and role", how1d:"Choose who you're playing and in which position (support, mid, jungle, solo, or carry).",
+    how2t:"2. Load both teams", how2d:"Add your allies and the enemies you already know you'll face (or as they show up during pick phase).",
+    how3t:"3. Analyze the match", how3d:"The engine reads the enemy composition: how much physical/magical damage, crowd control, mobility, and sustain it has.",
+    how4t:"4. Get your build", how4d:"We put together a starter, a 5-item core, and the best relics, with the reasoning behind every pick.",
+    homeNotice:"<b>Note:</b> the god and item data in this app is hand-curated using game mechanics (damage type, CC, mobility, sustain) and public info from smite2.com and wiki.smite2.com. It doesn't reflect live current-patch win rates — check patch notes if something changed recently.",
+    godsTitle:"God roster", godsSub:"Tap a god to see their counter profile and what builds shut them down.",
+    godSearchPh:"Search god...",
+    allRoles:"All roles", allDmg:"All damage types", physical:"Physical", magical:"Magical",
+    itemsTitle:"Items", itemsSub:"Curated item database: starters, offense, defense, hybrid, and relics.",
+    builderTitle:"Team Builder", builderSub:"Load your god and role, your team, and the enemy team. Then hit analyze.",
+    allyTitle:"🛡 Your team", enemyTitle:"⚔ Enemy team",
+    analyzeBtn:"Analyze match",
+    modesTitle:"Game Modes", modesSub:"A quick rundown of each mode so you know what you're getting into.",
+    footerText:"Ascendant is not an official Hi-Rez Studios product. Data curated for educational purposes for new Smite 2 players.",
+    chooseGod:"Choose your god", chooseRole:"Role", ally:"Ally", enemy:"Enemy", none:"— empty —",
+    itype_starter:"Starter", itype_offense:"Offense", itype_defense:"Defense", itype_hybrid:"Hybrid", itype_relic:"Relic",
+    resReadTitle:"Enemy team read", resThreatTitle:"Threats & warnings",
+    dmgSplit:"Enemy damage split", ccLevel:"Enemy crowd control", mobLevel:"Enemy mobility", sustLevel:"Enemy sustain / healing",
+    buildTitle:"Recommended build for you", relicTitle:"Recommended relics",
+    starterCol:"Starter", coreCol:"Core (5 items)", situCol:"Situational",
+    fillTeams:"Fill in at least your god to run an analysis.",
+    warnPhysical:"The enemy deals mostly physical damage — prioritize physical protections.",
+    warnMagical:"The enemy deals mostly magical damage — prioritize magical protections.",
+    warnMixed:"Enemy damage is split evenly between physical and magical — consider a more hybrid, balanced build.",
+    warnCC:"Heavy-control enemy comp — Purification Beads are close to mandatory.",
+    warnMob:"The enemy has a lot of mobility — you'll need ways to lock them down (slows/roots) or strong positioning.",
+    warnSustain:"The enemy has significant healing/sustain — add antiheal to your build.",
+    warnBurst:"High-burst threats on the enemy team — be careful getting caught alone, and consider Aegis for combos.",
+    warnTank:"The enemy has high-health tanks — prioritize penetration and anti-tank damage.",
+    goodBalanced:"The enemy composition is fairly balanced — you can build your standard build without big detours.",
+    noEnemyData:"Add enemy gods to get a real read on the composition.",
+    reasonAntiheal:"Cuts the healing/sustain we detected on the enemy team.",
+    reasonPen:"The enemy will stack protections — this penetration keeps you relevant.",
+    reasonCCred:"Reduces enemy crowd-control duration, key against this comp.",
+    reasonAntiTank:"Great against the tanks/high-health targets we identified on the enemy side.",
+    reasonAntiCrit:"Protects you from the crit carries we detected on the enemy team.",
+    reasonAura:"Gives protections/healing to your whole team in fights — your role needs this.",
+    reasonRoleFit:"Fits your role (%role%) and damage type (%dmg%).",
+    reasonDefaultDef:"Baseline protections to survive extended fights.",
+    reasonDefaultOff:"Standard damage core for your role.",
+    reasonMobility:"Gives you the extra mobility you need against this very mobile enemy.",
+    relicBeads:"With this much enemy control, it's nearly mandatory.",
+    relicAegis:"Saves you from the burst combos we detected.",
+    relicBlink:"Useful for initiating fights or escaping depending on your role.",
+    relicSunder:"Helps your team break through the enemy's high health / protections in fights.",
+    relicDefault:"A solid general pick for your role in this match.",
+    close:"Close", counterProfile:"Counter profile", strongAgainst:"Does well against...", weakAgainst:"Struggles against...",
+    tagCC:"Control", tagMobility:"Mobility", tagSustain:"Sustain", tagBurst:"Burst", tagPoke:"Poke", tagTank:"Tankiness",
+  }
+};
+
+function t(key){ return (I18N[LANG] && I18N[LANG][key]) || I18N.es[key] || key; }
+
+/* ---------------- game modes data ---------------- */
+const MODES = [
+  {id:"conquest", es:{name:"Conquista", desc:"5 vs 5 en el mapa grande de tres líneas, jungla y objetivos mayores. El modo principal y más estratégico — acá se aprenden roles, farmeo y macro juego. Duración: 25–40 min."},
+   en:{name:"Conquest", desc:"5v5 on the big three-lane map with jungle camps and major objectives. The main, most strategic mode — this is where roles, farming, and macro play are learned. Length: 25–40 min."}},
+  {id:"arena", es:{name:"Arena", desc:"5 vs 5 en un mapa ovalado sin líneas ni torres. Se gana bajando los 500 tickets del rival matando dioses/minions o mandando minions al portal enemigo. Ideal para combate constante y partidas cortas (~15 min)."},
+   en:{name:"Arena", desc:"5v5 on an oval map with no lanes or towers. You win by draining the enemy's 500 tickets by killing gods/minions or escorting minions into their portal. Great for constant fighting and short matches (~15 min)."}},
+  {id:"joust", es:{name:"Joust", desc:"3 vs 3 en un mapa chico de una sola línea con jungla a los costados. Combates frecuentes y rápidos; buen punto medio entre Arena y Conquista."},
+   en:{name:"Joust", desc:"3v3 on a small single-lane map with jungle on the sides. Frequent, fast fights; a good middle ground between Arena and Conquest."}},
+  {id:"assault", es:{name:"Asalto", desc:"5 vs 5 en una sola línea, sin jungla. El juego te asigna un dios al azar (podés re-rollear o intercambiar con compañeros). Todo es sobre pushear y pelear."},
+   en:{name:"Assault", desc:"5v5 on a single lane, no jungle. The game assigns you a random god (you can re-roll or swap with teammates). It's all about pushing and fighting."}},
+  {id:"duel", es:{name:"Duelo", desc:"Versión 1 contra 1 de Joust. Pura habilidad individual: laning, combate y manejo de recursos sin ayuda de nadie."},
+   en:{name:"Duel", desc:"A 1v1 version of Joust. Pure individual skill: laning, fighting, and resource management with no help from anyone."}},
+  {id:"quickplay", es:{name:"Partida Rápida (Arena)", desc:"Versión acelerada de Arena de unos 10 minutos, con sistema de items simplificado — pensada justamente para que los nuevos jugadores entren en acción rápido sin tener que estudiar toda la tienda."},
+   en:{name:"Quick Play (Arena)", desc:"An accelerated ~10 minute version of Arena with a simplified item system — built specifically so new players can jump into the action fast without studying the whole shop."}},
+];
+
+/* ---------------- helpers ---------------- */
+function godName(g){ return g.name; }
+function roleLabel(role){ return (LANG==='es'?ROLE_ES:ROLE_EN)[role]; }
+function pantheonLabel(g){ return LANG==='es' ? g.pantheon_es : g.pantheon; }
+function dmgLabel(d){ return d==='F' ? t('physical') : t('magical'); }
+function itemName(it){ return LANG==='es' ? it.es : it.name; }
+function itemDesc(it){ return LANG==='es' ? it.desc : it.desc_en; }
+function godById(id){ return GODS.find(g=>g.id===id); }
+
+/* ---------------- tabs ---------------- */
+function goTab(tab){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+tab).classList.add('active');
+}
+document.querySelectorAll('.tab-btn').forEach(b=>b.addEventListener('click', ()=>goTab(b.dataset.tab)));
+
+/* ---------------- language ---------------- */
+function setLang(lang){
+  LANG = lang;
+  document.getElementById('btn-es').classList.toggle('active', lang==='es');
+  document.getElementById('btn-en').classList.toggle('active', lang==='en');
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.dataset.i18n;
+    el.innerHTML = t(key);
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+    el.placeholder = t(el.dataset.i18nPh);
+  });
+  renderFilters();
+  renderGodGrid();
+  renderItemTabs();
+  renderItemGrid();
+  renderModes();
+  renderBuilderSelects();
+  // if results already shown, keep them but they'll refresh on next analyze
+}
+
+/* ---------------- DIOSES tab ---------------- */
+function renderFilters(){
+  const roleSel = document.getElementById('filter-role');
+  const dmgSel = document.getElementById('filter-dmg');
+  const roles = ['solo','jungla','mid','support','carry'];
+  roleSel.innerHTML = `<option value="">${t('allRoles')}</option>` + roles.map(r=>`<option value="${r}">${roleLabel(r)}</option>`).join('');
+  dmgSel.innerHTML = `<option value="">${t('allDmg')}</option><option value="F">${t('physical')}</option><option value="M">${t('magical')}</option>`;
+}
+
+function renderGodGrid(){
+  const grid = document.getElementById('god-grid');
+  const q = (document.getElementById('god-search').value||'').toLowerCase();
+  const roleF = document.getElementById('filter-role').value;
+  const dmgF = document.getElementById('filter-dmg').value;
+  const list = GODS.filter(g=>{
+    if(q && !g.name.toLowerCase().includes(q)) return false;
+    if(roleF && g.role!==roleF) return false;
+    if(dmgF && g.dmg!==dmgF) return false;
+    return true;
+  });
+  grid.innerHTML = list.map(g=>`
+    <div class="god-card" onclick="openGodModal('${g.id}')">
+      <img class="god-avatar" src="${g.icon}" alt="${g.name}" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<div class=\\'god-avatar\\' style=\\'display:flex;align-items:center;justify-content:center;font-family:Cinzel;font-weight:700;color:var(--gold-dim);\\'>${g.name[0]}</div>')">
+      <div class="gname">${g.name}</div>
+      <div class="gmeta">${roleLabel(g.role)} · ${pantheonLabel(g)}</div>
+      <span class="pill ${g.dmg}">${dmgLabel(g.dmg)}</span>
+    </div>
+  `).join('');
+}
+document.getElementById('god-search').addEventListener('input', renderGodGrid);
+document.getElementById('filter-role').addEventListener('change', renderGodGrid);
+document.getElementById('filter-dmg').addEventListener('change', renderGodGrid);
+
+function tagBars(tags){
+  const labels = {cc:'tagCC', mobility:'tagMobility', sustain:'tagSustain', burst:'tagBurst', poke:'tagPoke', tank:'tagTank'};
+  return Object.keys(labels).map(k=>`<span class="tagchip">${t(labels[k])}: <b>${tags[k]}/3</b></span>`).join('');
+}
+
+function counterProfile(g){
+  // heuristic counters based on tags/role — generic but reasoned
+  const strong = [], weak = [];
+  if(g.tags.mobility<=1) strong.push(LANG==='es' ? "gap-closers y engage directo (poca movilidad propia para escapar)" : "gap-closers and direct engage (low mobility to escape)");
+  if(g.tags.tank<=1) weak.push(LANG==='es' ? "burst alto y penetración temprana (vida baja)" : "high burst and early penetration (low health)");
+  if(g.tags.cc<=1) weak.push(LANG==='es' ? "iniciación con control fuerte, ya que no tiene con qué responder" : "hard-CC initiation, since it has little to answer with");
+  if(g.tags.sustain<=0) weak.push(LANG==='es' ? "poke sostenido en línea (sin cómo recuperar vida)" : "sustained poke in lane (no way to recover health)");
+  if(g.role==='mid'||g.role==='carry') weak.push(LANG==='es' ? "asesinos/jungla que lo agarran solo" : "assassins/junglers catching it alone");
+  if(g.tags.tank>=2) strong.push(LANG==='es' ? "peleas prolongadas cuerpo a cuerpo" : "extended close-range fights");
+  if(g.tags.cc>=2) strong.push(LANG==='es' ? "carrys y mid sin reducción de control" : "carries and mids without CC reduction");
+  if(g.tags.mobility>=2) strong.push(LANG==='es' ? "objetivos aislados / peleas en movimiento" : "isolated targets / mobile fights");
+  if(strong.length===0) strong.push(LANG==='es' ? "matchups parejos donde puede jugar su combo con calma" : "even matchups where it can play its combo calmly");
+  if(weak.length===0) weak.push(LANG==='es' ? "equipos coordinados que lo enfocan primero" : "coordinated teams that focus it first");
+  return {strong, weak};
+}
+
+function openGodModal(id){
+  const g = godById(id);
+  const cp = counterProfile(g);
+  const modal = document.getElementById('god-modal');
+  modal.innerHTML = `
+    <button class="modal-close" onclick="closeGodModal()">✕</button>
+    <div class="modal-head">
+      <img src="${g.icon}" onerror="this.style.visibility='hidden'">
+      <div>
+        <h3>${g.name}</h3>
+        <div class="gmeta">${pantheonLabel(g)} · ${g.attack==='melee'?(LANG==='es'?'Cuerpo a cuerpo':'Melee'):(LANG==='es'?'A distancia':'Ranged')} · ${dmgLabel(g.dmg)} · ${roleLabel(g.role)}</div>
+      </div>
+    </div>
+    <div class="tagbar">${tagBars(g.tags)}</div>
+    <h4>${t('strongAgainst')}</h4>
+    <ul class="counter-list">${cp.strong.map(s=>`<li>${s}</li>`).join('')}</ul>
+    <h4>${t('weakAgainst')}</h4>
+    <ul class="counter-list">${cp.weak.map(s=>`<li>${s}</li>`).join('')}</ul>
+  `;
+  document.getElementById('god-modal-bg').classList.add('open');
+}
+function closeGodModal(){ document.getElementById('god-modal-bg').classList.remove('open'); }
+
+/* ---------------- ITEMS tab ---------------- */
+const ITEM_TYPES = ['starter','offense','defense','hybrid','relic'];
+let activeItemType = 'starter';
+function renderItemTabs(){
+  const wrap = document.getElementById('item-tabs');
+  wrap.innerHTML = ITEM_TYPES.map(ty=>`<button class="itag-btn ${ty===activeItemType?'active':''}" onclick="setItemType('${ty}')">${t('itype_'+ty)}</button>`).join('');
+}
+function setItemType(ty){ activeItemType = ty; renderItemTabs(); renderItemGrid(); }
+function renderItemGrid(){
+  const grid = document.getElementById('item-grid');
+  const list = ITEMS.filter(it=>it.type===activeItemType);
+  grid.innerHTML = list.map(it=>`
+    <div class="item-card">
+      <div class="ihead">
+        <img class="item-icon" src="${it.icon}" alt="${it.name}" onerror="this.outerHTML='<div class=\\'item-icon item-icon-fallback\\'>'+'${it.name[0]}'+'</div>'">
+        <div style="flex:1;">
+          <div class="iname">${itemName(it)}</div>
+        </div>
+        <span class="itype-badge">${it.power==='F'?t('physical'):it.power==='M'?t('magical'):(LANG==='es'?'Neutro':'Neutral')}</span>
+      </div>
+      <div class="idesc">${itemDesc(it)}</div>
+    </div>
+  `).join('');
+}
+
+/* ---------------- MODOS tab ---------------- */
+function renderModes(){
+  const grid = document.getElementById('modes-grid');
+  grid.innerHTML = MODES.map(m=>`
+    <div class="mode-card"><h4>${m[LANG].name}</h4><p>${m[LANG].desc}</p></div>
+  `).join('');
+}
+
+/* ---------------- BUILDER tab ---------------- */
+function godOptions(selectedId){
+  return `<option value="">${t('none')}</option>` + GODS.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(g=>`<option value="${g.id}" ${g.id===selectedId?'selected':''}>${g.name}</option>`).join('');
+}
+function roleOptions(selectedRole){
+  const roles = ['solo','jungla','mid','support','carry'];
+  return roles.map(r=>`<option value="${r}" ${r===selectedRole?'selected':''}>${roleLabel(r)}</option>`).join('');
+}
+function renderBuilderSelects(){
+  // preserve current selections across language switch
+  const prevMyGod = document.getElementById('my-god') ? document.getElementById('my-god').value : '';
+  const prevMyRole = document.getElementById('my-role') ? document.getElementById('my-role').value : 'mid';
+  document.getElementById('my-god').innerHTML = godOptions(prevMyGod);
+  document.getElementById('my-role').innerHTML = roleOptions(prevMyRole || 'mid');
+
+  const allySlots = document.getElementById('ally-slots');
+  const prevAllies = Array.from(allySlots.querySelectorAll('select')).map(s=>s.value);
+  allySlots.innerHTML = [0,1,2,3].map(i=>`
+    <div class="slot-row"><select id="ally-${i}">${godOptions(prevAllies[i]||'')}</select></div>
+  `).join('');
+
+  const enemySlots = document.getElementById('enemy-slots');
+  const prevEnemies = Array.from(enemySlots.querySelectorAll('select')).map(s=>s.value);
+  enemySlots.innerHTML = [0,1,2,3,4].map(i=>`
+    <div class="slot-row"><select id="enemy-${i}">${godOptions(prevEnemies[i]||'')}</select></div>
+  `).join('');
+}
+
+/* ---------------- ANALYSIS ENGINE ---------------- */
+function getSelectedEnemies(){
+  return [0,1,2,3,4].map(i=>document.getElementById('enemy-'+i).value).filter(Boolean).map(godById);
+}
+function getSelectedAllies(){
+  return [0,1,2,3].map(i=>document.getElementById('ally-'+i).value).filter(Boolean).map(godById);
+}
+
+function analyzeMatch(){
+  const myGodId = document.getElementById('my-god').value;
+  if(!myGodId){ alert(t('fillTeams')); return; }
+  const myGod = godById(myGodId);
+  const myRole = document.getElementById('my-role').value;
+  const enemies = getSelectedEnemies();
+  const allies = getSelectedAllies();
+
+  const results = document.getElementById('results');
+  results.classList.add('show');
+
+  if(enemies.length===0){
+    results.innerHTML = `<div class="notice">${t('noEnemyData')}</div>`;
+    results.scrollIntoView({behavior:'smooth', block:'start'});
+    return;
+  }
+
+  // ---- aggregate enemy stats ----
+  const physCount = enemies.filter(e=>e.dmg==='F').length;
+  const magCount = enemies.filter(e=>e.dmg==='M').length;
+  const total = enemies.length;
+  const physPct = Math.round((physCount/total)*100);
+  const magPct = 100-physPct;
+
+  const sum = (key)=>enemies.reduce((a,e)=>a+e.tags[key],0);
+  const avg = (key)=>sum(key)/total;
+  const ccScore = avg('cc');
+  const mobScore = avg('mobility');
+  const sustScore = avg('sustain');
+  const burstScore = avg('burst');
+  const tankScore = avg('tank');
+
+  const threats = [];
+  if(physPct>=65) threats.push({type:'warn', text:t('warnPhysical')});
+  else if(magPct>=65) threats.push({type:'warn', text:t('warnMagical')});
+  else threats.push({type:'warn', text:t('warnMixed')});
+
+  if(ccScore>=1.8) threats.push({type:'warn', text:t('warnCC')});
+  if(mobScore>=1.8) threats.push({type:'warn', text:t('warnMob')});
+  if(sustScore>=1.6) threats.push({type:'warn', text:t('warnSustain')});
+  if(burstScore>=2.0) threats.push({type:'warn', text:t('warnBurst')});
+  if(tankScore>=2.0) threats.push({type:'warn', text:t('warnTank')});
+  if(threats.length<=1) threats.push({type:'good', text:t('goodBalanced')});
+
+  // ---- build recommendation ----
+  const needAntiheal = sustScore>=1.6;
+  const needPen = tankScore>=1.6;
+  const needCCred = ccScore>=1.8;
+  const needAntiCrit = enemies.some(e=>e.role==='carry' && e.tags.burst>=2);
+  const needAntiTank = tankScore>=2.0;
+  const needMobility = mobScore>=2.0 && (myRole==='mid'||myRole==='carry');
+  const enemyMajorityPhys = physPct>=50;
+
+  const myPower = myGod.dmg; // F or M
+
+  function pick(filterFn, excludeNames){
+    const pool = ITEMS.filter(it=>filterFn(it) && !excludeNames.includes(it.name));
+    return pool[0] || null;
+  }
+
+  const chosen = [];
+  const usedNames = [];
+
+  function addItem(it, reasonKey, extra){
+    if(!it || usedNames.includes(it.name)) return;
+    usedNames.push(it.name);
+    chosen.push({item:it, reasonKey, extra});
+  }
+
+  // starter
+  let starter;
+  if(myRole==='support'){
+    starter = pick(it=>it.type==='starter' && it.power==='M' && it.tags.includes('support'), usedNames)
+      || pick(it=>it.type==='starter' && it.power===myPower, usedNames);
+  } else if(myPower==='F'){
+    starter = pick(it=>it.type==='starter' && it.power==='F' && (myRole==='carry'?it.tags.includes('carry'):true), usedNames)
+      || pick(it=>it.type==='starter' && it.power==='F', usedNames);
+  } else {
+    starter = pick(it=>it.type==='starter' && it.power==='M', usedNames);
+  }
+  addItem(starter, 'reasonRoleFit');
+
+  // core offense/defense mix depending on role
+  const isFrontline = (myRole==='solo'||myRole==='support');
+
+  // 1) antiheal if needed
+  if(needAntiheal){
+    const it = pick(x=>x.tags.includes('antiheal') && (x.power===myPower || x.power==='N') && (isFrontline? x.type!=='offense' || true : true), usedNames)
+      || pick(x=>x.tags.includes('antiheal'), usedNames);
+    addItem(it, 'reasonAntiheal');
+  }
+  // 2) penetration if enemy stacking protections / tanky
+  if(needPen){
+    const it = pick(x=>x.type==='offense' && x.power===myPower && x.tags.includes('penetration'), usedNames)
+      || pick(x=>x.tags.includes('penetration'), usedNames);
+    addItem(it, 'reasonPen');
+  }
+  // 3) anti-tank if very tanky enemy
+  if(needAntiTank){
+    const it = pick(x=>x.tags.includes('anti-tank') && x.power===myPower, usedNames)
+      || pick(x=>x.tags.includes('anti-tank'), usedNames);
+    addItem(it, 'reasonAntiTank');
+  }
+  // 4) anti-crit if enemy has crit carry
+  if(needAntiCrit && isFrontline){
+    const it = pick(x=>x.tags.includes('anti-crit'), usedNames);
+    addItem(it, 'reasonAntiCrit');
+  }
+  // 5) CC reduction if heavy CC
+  if(needCCred && isFrontline){
+    const it = pick(x=>x.tags.includes('cc-reduction'), usedNames);
+    addItem(it, 'reasonCCred');
+  }
+  // 6) mobility item if enemy very mobile and I'm squishy role
+  if(needMobility){
+    const it = pick(x=>x.tags.includes('mobility') && x.type!=='relic', usedNames);
+    addItem(it, 'reasonMobility');
+  }
+  // 7) aura item if support/solo frontline
+  if(isFrontline && chosen.length<5){
+    const it = pick(x=>x.tags.includes('aura') && x.power==='N' && (enemyMajorityPhys? x.protection==='F': x.protection==='M'), usedNames)
+      || pick(x=>x.tags.includes('aura'), usedNames);
+    addItem(it, 'reasonAura');
+  }
+
+  // fill remaining slots up to 5 with sensible defaults by role
+  while(chosen.length<5){
+    let it;
+    if(isFrontline){
+      const protType = enemyMajorityPhys ? 'F' : 'M';
+      it = pick(x=>x.type==='defense' && x.protection===protType, usedNames)
+        || pick(x=>x.type==='defense', usedNames)
+        || pick(x=>x.type==='hybrid', usedNames);
+      addItem(it, 'reasonDefaultDef');
+    } else {
+      it = pick(x=>x.type==='offense' && x.power===myPower, usedNames)
+        || pick(x=>x.type==='hybrid' && x.power===myPower, usedNames)
+        || pick(x=>x.type==='offense', usedNames);
+      addItem(it, 'reasonDefaultOff');
+    }
+    if(!it) break; // avoid infinite loop if pool exhausted
+  }
+
+  const coreItems = chosen.slice(0,5);
+
+  // situational bench (2-3 extra options not in core)
+  const situational = [];
+  const situPool = ITEMS.filter(it=>it.type!=='starter' && it.type!=='relic' && !usedNames.includes(it.name));
+  const situPicks = [];
+  if(needAntiheal===false){
+    const it = situPool.find(x=>x.tags.includes('antiheal'));
+    if(it) situPicks.push({item:it, reasonKey:'reasonAntiheal'});
+  }
+  const ccIt = situPool.find(x=>x.tags.includes('cc-reduction') && !situPicks.some(s=>s.item.name===x.name));
+  if(ccIt) situPicks.push({item:ccIt, reasonKey:'reasonCCred'});
+  const antiTankIt = situPool.find(x=>x.tags.includes('anti-tank') && !situPicks.some(s=>s.item.name===x.name));
+  if(antiTankIt) situPicks.push({item:antiTankIt, reasonKey:'reasonAntiTank'});
+
+  // relics
+  const relics = [];
+  function relicByName(n){ return ITEMS.find(it=>it.name===n) || {name:n, es:n}; }
+  if(needCCred || ccScore>=1.3) relics.push({item:relicByName("Purification Beads"), reasonKey:'relicBeads'});
+  if(needAntiCrit || burstScore>=2.0) relics.push({item:relicByName("Aegis Amulet"), reasonKey:'relicAegis'});
+  if(relics.length<2){
+    if(myRole==='jungla'||myRole==='solo') relics.push({item:relicByName("Blink Rune"), reasonKey:'relicBlink'});
+    else relics.push({item:relicByName("Sunder"), reasonKey:'relicSunder'});
+  }
+
+  // ---- render results ----
+  function reasonText(reasonKey, item){
+    let txt = t(reasonKey);
+    if(reasonKey==='reasonRoleFit'){
+      txt = txt.replace('%role%', roleLabel(myRole)).replace('%dmg%', dmgLabel(myPower));
+    }
+    return txt;
+  }
+
+  function itemDisplayName(item){
+    return LANG==='es' ? (item.es||item.name) : item.name;
+  }
+  function itemIconTag(item){
+    if(!item.icon) return '';
+    return `<img class="mini-icon" src="${item.icon}" alt="" onerror="this.style.display='none'">`;
+  }
+
+  const barPct = (v)=>Math.min(100, Math.round((v/3)*100));
+
+  results.innerHTML = `
+    <div class="res-grid">
+      <div class="res-card">
+        <h4>${t('resReadTitle')}</h4>
+        <div class="bar-row">
+          <div class="blabel"><span>${t('dmgSplit')}</span><span>${t('physical')} ${physPct}% / ${t('magical')} ${magPct}%</span></div>
+          <div class="bar-track"><div class="bar-fill f" style="width:${physPct}%"></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="blabel"><span>${t('ccLevel')}</span><span>${ccScore.toFixed(1)}/3</span></div>
+          <div class="bar-track"><div class="bar-fill ${ccScore>=1.8?'warn':'ok'}" style="width:${barPct(ccScore)}%"></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="blabel"><span>${t('mobLevel')}</span><span>${mobScore.toFixed(1)}/3</span></div>
+          <div class="bar-track"><div class="bar-fill ${mobScore>=1.8?'warn':'ok'}" style="width:${barPct(mobScore)}%"></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="blabel"><span>${t('sustLevel')}</span><span>${sustScore.toFixed(1)}/3</span></div>
+          <div class="bar-track"><div class="bar-fill ${sustScore>=1.6?'warn':'ok'}" style="width:${barPct(sustScore)}%"></div></div>
+        </div>
+      </div>
+      <div class="res-card">
+        <h4>${t('resThreatTitle')}</h4>
+        <ul class="threat-list">
+          ${threats.map(th=>`<li class="${th.type==='good'?'good':''}"><span class="dot"></span>${th.text}</li>`).join('')}
+        </ul>
+      </div>
+    </div>
+
+    <div class="res-card" style="margin-bottom:20px;">
+      <h4>${t('buildTitle')}</h4>
+      <div class="build-cols">
+        <div class="build-col">
+          <h5>${t('starterCol')}</h5>
+          ${starter ? `<div class="build-item"><div class="biname">${itemIconTag(starter)}${itemDisplayName(starter)}</div><div class="bireason">${reasonText('reasonRoleFit')}</div></div>` : ''}
+        </div>
+        <div class="build-col">
+          <h5>${t('coreCol')}</h5>
+          ${coreItems.map(c=>`<div class="build-item"><div class="biname">${itemIconTag(c.item)}${itemDisplayName(c.item)}</div><div class="bireason">${reasonText(c.reasonKey, c.item)}</div></div>`).join('')}
+        </div>
+        <div class="build-col">
+          <h5>${t('situCol')}</h5>
+          ${situPicks.length ? situPicks.map(c=>`<div class="build-item"><div class="biname">${itemIconTag(c.item)}${itemDisplayName(c.item)}</div><div class="bireason">${reasonText(c.reasonKey, c.item)}</div></div>`).join('') : `<div class="build-item"><div class="bireason">${LANG==='es'?'Sin alternativas destacadas para este matchup.':'No standout alternatives for this matchup.'}</div></div>`}
+        </div>
+      </div>
+    </div>
+
+    <div class="res-card">
+      <h4>${t('relicTitle')}</h4>
+      <div class="relic-row">
+        ${relics.map(r=>`<div class="relic-chip"><b>${itemIconTag(r.item)}${itemDisplayName(r.item)}</b><span>${reasonText(r.reasonKey)}</span></div>`).join('')}
+      </div>
+    </div>
+  `;
+
+  results.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+/* ---------------- init ---------------- */
+setLang('es');
+
+</script>
+</body>
+</html>
